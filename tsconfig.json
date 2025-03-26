@@ -1,0 +1,53 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"moduleResolution": "node",
+		"rootDir": "src",
+		"outDir": "dist",
+		"strict": true,
+		"strictNullChecks": true,
+		"checkJs": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"allowUnreachableCode": false,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"allowUnusedLabels": true,
+		"strictFunctionTypes": true,
+		"strictPropertyInitialization": true,
+		"exactOptionalPropertyTypes": true,
+		"noUncheckedIndexedAccess": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"baseUrl": "./",
+		"paths": {
+			"services/*": [
+				"src/services/*"
+			],
+			"utils/*": [
+				"src/utils/*"
+			],
+			"config": [
+				"src/config/index"
+			],
+			"deps": [
+				"src/deps"
+			],
+			"queries/*": [
+				"src/MongoDb/queries/*"
+			],
+			"Types/*": [
+				"src/Types/*"
+			]
+		}
+	},
+	"include": [
+		"src"
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	]
+}

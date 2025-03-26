@@ -1,0 +1,29 @@
+{
+    "presets": [
+        [
+            "@babel/preset-env",
+            {
+                "modules": "commonjs"
+            }
+        ],
+        "@babel/preset-typescript"
+    ],
+    "plugins": [
+        [
+            "module-resolver",
+            {
+                "root": [
+                    "./src"
+                ],
+                "alias": {
+                    "services": "./src/services",
+                    "utils": "./src/utils",
+                    "config": "./src/config",
+                    "deps": "./src/deps",
+                    "queries": "./src/MongoDb/queries",
+                    "Types": "./src/Types"
+                }
+            }
+        ]
+    ]
+}

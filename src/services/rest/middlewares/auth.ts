@@ -1,0 +1,35 @@
+import config from 'config'
+import { Context, Next } from 'deps'
+
+import * as authQueries from 'queries/auth'
+
+import { isTokenValid } from '../helpers/jwtFunctions'
+
+const auth = async (ctx: Context, next: Next) => {
+	const accessTokenName = config.cookie.ACCESS_TOKEN_COOKIE_NAME
+	const cookie = ctx.cookies.get(accessTokenName)
+
+	if (!cookie || typeof cookie !== 'string') {
+		ctx.throw(401, 'Invalid Use1')
+	}
+
+	const decodedToken = isTokenValid(cookie)
+
+	if (!decodedToken || typeof decodedToken.email !== 'string') {
+		ctx.throw(401, 'Invalid User2')
+	}
+
+	const user = await authQueries.getUserByEmail(decodedToken.email)
+
+	if (!user) {
+		ctx.throw(401, 'Invalid User3')
+	}
+
+	const { email, profilePictureUrl } = user
+
+	ctx.state.shared = { user: { email, profilePictureUrl } }
+
+	return next()
+}
+
+export default auth
