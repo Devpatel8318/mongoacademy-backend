@@ -12,26 +12,14 @@ export const getCookieParameters = (
 	secure = isProd,
 	sameSite: SameSiteOption = isProd ? 'none' : 'strict',
 	overwrite = true
-) => {
-	console.log('getCookieParameters=>')
-	console.log({
-		maxAge,
-		path,
-		httpOnly,
-		secure,
-		sameSite,
-		overwrite,
-	})
-
-	return {
-		maxAge,
-		path,
-		httpOnly,
-		secure,
-		sameSite,
-		overwrite,
-	}
-}
+) => ({
+	maxAge,
+	path,
+	httpOnly,
+	secure,
+	sameSite,
+	overwrite,
+})
 
 interface SetAccessTokenCookieProps {
 	ctx: Context
@@ -40,7 +28,7 @@ interface SetAccessTokenCookieProps {
 	path?: string
 }
 
-export const setAccessTokenCookie = async ({
+export const setAccessTokenCookie = ({
 	ctx,
 	data,
 	maxAge = 1000 * 60 * 60, // 60 minutes,
@@ -55,7 +43,7 @@ export const setAccessTokenCookie = async ({
 	)
 }
 
-export const setRefreshTokenCookie = async ({
+export const setRefreshTokenCookie = ({
 	ctx,
 	data,
 	maxAge = 1000 * 60 * 60 * 24 * 30, // 30 days
@@ -70,7 +58,7 @@ export const setRefreshTokenCookie = async ({
 	)
 }
 
-export const setAuthCookies = async (
+export const setAuthCookies = (
 	ctx: Context,
 	data: Object,
 	maxAge?: number,

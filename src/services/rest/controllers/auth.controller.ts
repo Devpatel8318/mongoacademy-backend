@@ -18,9 +18,11 @@ export const signup = async (ctx: Context) => {
 	const hashedPassword = await hashData(password)
 
 	const userId = await createUser(email, { password: hashedPassword })
+
 	try {
-		await setAuthCookies(ctx, { email, userId })
-	} catch {
+		setAuthCookies(ctx, { email, userId })
+	} catch (error) {
+		console.error('SignUp failed error:', error)
 		ctx.throw('Signup Successful, Login Failed.')
 	}
 
@@ -30,15 +32,13 @@ export const signup = async (ctx: Context) => {
 export const loginUser = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
 
-	console.log('LOGIN CONTROLLER')
-
 	try {
-		await setAuthCookies(ctx, {
+		setAuthCookies(ctx, {
 			email,
 			userId,
 		})
 	} catch (error) {
-		console.log('Login failed error:', error)
+		console.error('Login failed error:', error)
 		ctx.throw('Login Failed.')
 	}
 	ctx.body = successObject('Login Successful.')
@@ -73,8 +73,9 @@ export const oauthGoogle = async (ctx: Context) => {
 	}
 
 	try {
-		await setAuthCookies(ctx, tokenContent)
-	} catch {
+		setAuthCookies(ctx, tokenContent)
+	} catch (error) {
+		console.error('OAuth failed error:', error)
 		ctx.throw(errorMessage)
 	}
 
@@ -85,8 +86,9 @@ export const provideAccessToken = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
 
 	try {
-		await setAccessTokenCookie({ ctx, data: { email, userId } })
-	} catch {
+		setAccessTokenCookie({ ctx, data: { email, userId } })
+	} catch (error) {
+		console.error('Refresh Token failed error:', error)
 		ctx.throw('Refresh Token Failed.')
 	}
 
@@ -102,7 +104,8 @@ export const logoutUser = async (ctx: Context) => {
 			maxAge: 0,
 			path: '/auth/refresh',
 		})
-	} catch {
+	} catch (error) {
+		console.error('Logout failed error:', error)
 		ctx.throw('Logout Failed.')
 	}
 
