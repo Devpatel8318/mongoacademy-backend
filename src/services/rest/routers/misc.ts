@@ -2,7 +2,11 @@ import { Router } from 'deps'
 
 const router = new Router()
 
-router.post('/health', async (ctx) => {
+router.get('/', async (ctx) => {
+	ctx.body = 'OK'
+})
+
+router.get('/health', async (ctx) => {
 	ctx.body = 'OK'
 })
 

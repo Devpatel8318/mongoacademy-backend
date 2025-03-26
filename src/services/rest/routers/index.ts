@@ -1,9 +1,9 @@
 import answer from './answer'
 import user from './user'
 import auth from './auth'
-import health from './health'
+import misc from './misc'
 
-const routers = [answer, user, auth, health]
+const routers = [answer, user, auth, misc]
 
 export default (app: any) => {
 	routers.forEach((router) => {
