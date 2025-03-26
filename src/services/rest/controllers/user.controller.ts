@@ -8,7 +8,7 @@ import { successObject } from 'utils/responseObject'
 import { getDataFromRedis, setDataInRedis } from 'utils/redis/redis'
 
 export const checkAnswer = async (ctx: Context) => {
-	const checkExecutionTime = config.checkExecutionTime
+	const checkExecutionTime = config.common.checkExecutionTime
 
 	const { collection: questionCollection, filter: questionFilter } =
 		ctx.state.shared.question
