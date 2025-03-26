@@ -8,8 +8,10 @@ export const getCookieParameters = (
 	maxAge: number,
 	path = '/',
 	httpOnly = true,
-	secure = false, // TODO: Change to true in non-local environment
-	sameSite: SameSiteOption = 'strict', // TODO: Change to 'none' in non-local environment
+	secure = config.common.NODE_ENV === 'production', // TODO: Change to true in non-local environment
+	sameSite: SameSiteOption = config.common.NODE_ENV === 'production' // TODO: Change to 'none' in non-local environment
+		? 'none'
+		: 'strict',
 	overwrite = true
 ) => ({
 	maxAge,
