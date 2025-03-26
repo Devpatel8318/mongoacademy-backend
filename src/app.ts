@@ -10,6 +10,7 @@ import restRoutes from 'services/rest/routers'
 import adminRoutes from 'services/admin/routers'
 
 const app = new Koa()
+app.proxy = true
 
 const adminFrontUrl = config.common.adminFrontendUrl
 const userFrontUrl = config.common.userFrontendUrl
