@@ -30,12 +30,15 @@ export const signup = async (ctx: Context) => {
 export const loginUser = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
 
+	console.log('LOGIN CONTROLLER')
+
 	try {
 		await setAuthCookies(ctx, {
 			email,
 			userId,
 		})
-	} catch {
+	} catch (error) {
+		console.log('Login failed error:', error)
 		ctx.throw('Login Failed.')
 	}
 	ctx.body = successObject('Login Successful.')

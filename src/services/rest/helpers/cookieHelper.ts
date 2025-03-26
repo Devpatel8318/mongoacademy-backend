@@ -1,6 +1,7 @@
 import config from 'config'
 import { Context } from 'deps'
 import { generateAuthToken } from 'services/rest/helpers/jwtFunctions'
+import { isProd } from 'utils/environment'
 
 type SameSiteOption = 'strict' | 'lax' | 'none' | boolean
 
@@ -8,19 +9,29 @@ export const getCookieParameters = (
 	maxAge: number,
 	path = '/',
 	httpOnly = true,
-	secure = config.common.NODE_ENV === 'production', // TODO: Change to true in non-local environment
-	sameSite: SameSiteOption = config.common.NODE_ENV === 'production' // TODO: Change to 'none' in non-local environment
-		? 'none'
-		: 'strict',
+	secure = isProd,
+	sameSite: SameSiteOption = isProd ? 'none' : 'strict',
 	overwrite = true
-) => ({
-	maxAge,
-	path,
-	httpOnly,
-	secure,
-	sameSite,
-	overwrite,
-})
+) => {
+	console.log('getCookieParameters=>')
+	console.log({
+		maxAge,
+		path,
+		httpOnly,
+		secure,
+		sameSite,
+		overwrite,
+	})
+
+	return {
+		maxAge,
+		path,
+		httpOnly,
+		secure,
+		sameSite,
+		overwrite,
+	}
+}
 
 interface SetAccessTokenCookieProps {
 	ctx: Context
