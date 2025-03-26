@@ -68,8 +68,8 @@ export const isCredentialsCorrect = (ctx: Context) => {
 	if (validationErrors.length) return null
 
 	if (
-		email !== process.env.ADMIN_EMAIL ||
-		password !== process.env.ADMIN_PASSWORD
+		email !== config.admin.ADMIN_EMAIL ||
+		password !== config.admin.ADMIN_PASSWORD
 	) {
 		ctx.throw(401, 'Invalid Credentials')
 	}

@@ -4,14 +4,15 @@ import responseTime from 'koa-response-time'
 import logger from 'koa-logger'
 import errorHandler from 'koa-json-error'
 import bodyParser from 'koa-bodyparser'
+import config from 'config'
 
 import restRoutes from 'services/rest/routers'
 import adminRoutes from 'services/admin/routers'
 
 const app = new Koa()
 
-const adminFrontUrl = process.env.ADMIN_FRONTEND_URL || ''
-const userFrontUrl = process.env.USER_FRONTEND_URL || ''
+const adminFrontUrl = config.common.adminFrontendUrl
+const userFrontUrl = config.common.userFrontendUrl
 
 const corsOptions: cors.Options = {
 	origin: (request) => {

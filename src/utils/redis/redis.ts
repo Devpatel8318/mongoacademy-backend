@@ -1,14 +1,15 @@
 import { Redis } from 'deps'
+import config from 'config'
 
 const connectObject = {
-	host: process.env.REDIS_HOST || 'localhost',
-	port: parseInt(process.env.REDIS_PORT || '6379'),
+	host: config.redis.host,
+	port: config.redis.port,
 }
 
-if (process.env.ENVIRONMENT === 'production') {
+if (config.common.NODE_ENV === 'production') {
 	Object.assign(connectObject, {
-		username: process.env.REDIS_USERNAME || '',
-		password: process.env.REDIS_PASSWORD || '',
+		username: config.redis.username,
+		password: config.redis.password,
 	})
 }
 

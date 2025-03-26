@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import config from 'config'
 
 const SALT_LENGTH = 16
 const IV_LENGTH = 12
@@ -7,7 +8,7 @@ const KEY_LENGTH = 32 // 256-bit key
 const ALGORITHM = 'aes-256-gcm'
 
 const getEncryptionKey = (): string => {
-	const key = process.env.ENCRYPTION_KEY
+	const key = config.encryptDecrypt.encryptionKey
 	if (!key) {
 		throw new Error('ENCRYPTION_KEY environment variable is not set')
 	}

@@ -211,8 +211,8 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 			const { data: tokenResponse } = await axios.post(
 				'https://oauth2.googleapis.com/token',
 				{
-					client_id: process.env.GOOGLE_CLIENT_ID,
-					client_secret: process.env.GOOGLE_CLIENT_SECRET,
+					client_id: config.google.googleClientId,
+					client_secret: config.google.googleClientSecret,
 					code,
 					grant_type: 'authorization_code',
 					redirect_uri: 'postmessage',
