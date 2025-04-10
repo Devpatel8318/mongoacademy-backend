@@ -1,11 +1,6 @@
 import { Router } from 'deps'
 
-import {
-	getAllQuestions,
-	getSolution,
-	submitAnswer,
-	evaluateAnswer,
-} from '../controllers/answer.controller'
+import { submitAnswer, evaluateAnswer } from '../controllers/answer.controller'
 
 import validator from '../middlewares/validator'
 import {
@@ -41,9 +36,5 @@ router.post(
 	validator([isQuestionIdValid]),
 	evaluateAnswer
 )
-
-router.get('/list', getAllQuestions)
-
-router.post('/solution', getSolution)
 
 export default router
