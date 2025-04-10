@@ -58,7 +58,7 @@ const methodsOnDbCollection = {
 		'validate',
 		'watch',
 	],
-	currentlySupportedQueryTypes: ['find', 'findOne'],
+	currentlySupportedQueryTypes: ['find', 'findOne', 'aggregate'],
 }
 
 export default methodsOnDbCollection

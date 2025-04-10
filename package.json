@@ -5,9 +5,9 @@
 	"scripts": {
 		"start": "tsx src/server.ts",
 		"dev": "NODE_ENV=development nodemon",
+		"format": "prettier --write 'src/**/*.{ts}'",
 		"lint": "eslint 'src/**/*.ts'",
 		"lint:fix": "eslint 'src/**/*.ts' --fix",
-		"format": "prettier --write 'src/**/*.{ts,json}'",
 		"type-check": "tsc --noEmit",
 		"build": "rimraf dist && yarn run babel src --out-dir dist --extensions \".ts\"",
 		"prod": "yarn run build && NODE_ENV=production node dist/server.js",

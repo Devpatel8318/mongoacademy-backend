@@ -1,3 +1,4 @@
+// TODO: use implementation in which redis only initializes once
 import { Redis } from 'deps'
 import config from 'config'
 

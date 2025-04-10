@@ -47,3 +47,5 @@ koa-cache/
 
 # AWS or cloud services (if applicable)
 .aws/
+
+*.rdb
