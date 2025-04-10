@@ -2,6 +2,11 @@ import { Context, Sort } from 'deps'
 import { successObject } from 'utils/responseObject'
 import * as questionQueries from 'queries/questions'
 import { getDataFromRedis, setDataInRedis } from 'utils/redis/redis'
+import concurrently from 'utils/concurrently'
+import getMd5Hash from 'utils/getMd5Hash'
+import getDbQueryPromise, {
+	DatabaseSchemaQueryType,
+} from '../helpers/getDbQueryPromise'
 
 interface GetAllQuestionsQueryParams {
 	limit?: string
@@ -106,4 +111,52 @@ export const getSolution = async (ctx: Context) => {
 	})
 
 	ctx.body = successObject('', response)
+}
+
+export interface SingleDataBaseSchema {
+	title: string
+	query: DatabaseSchemaQueryType
+}
+
+export const viewQuestion = async (ctx: Context) => {
+	const questionData = ctx.state.shared.question
+
+	const { questionId, dataBaseSchema } = questionData as {
+		questionId: number
+		dataBaseSchema: SingleDataBaseSchema[]
+	}
+
+	const schemaResponses: { title: string; schema: any }[] = []
+
+	await concurrently(
+		dataBaseSchema,
+		async (schemaItem: SingleDataBaseSchema) => {
+			const { title, query } = schemaItem
+			let schemaResult
+
+			const cacheKey = `questionId=${questionId}-${getMd5Hash(`title=${title}:query=${JSON.stringify(query)}`)}`
+			const cachedSchema = await getDataFromRedis(cacheKey)
+
+			if (cachedSchema) {
+				schemaResult = cachedSchema
+			} else {
+				const dbExecutionPromise = getDbQueryPromise(query)
+				const fetchedSchema = await dbExecutionPromise
+
+				await setDataInRedis(
+					cacheKey,
+					fetchedSchema,
+					1 * 60 * 60 * 24 // 1 day
+				)
+				schemaResult = fetchedSchema
+			}
+
+			schemaResponses.push({ title, schema: schemaResult })
+		}
+	)
+
+	ctx.body = successObject('Question data displayed successfully.', {
+		...questionData,
+		dataBaseSchema: schemaResponses,
+	})
 }

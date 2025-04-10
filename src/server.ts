@@ -1,6 +1,7 @@
 // TODO: add security in submit answer api
 // TODO: replace ctx.throw with failureObject (make new)
 //TODO: make separate routes for answer and question
+//TODO: change names of queries from get to find like 'findOneQuestion' 'findAllQuestions'
 import http from 'http'
 import app from './app'
 import config from 'config'

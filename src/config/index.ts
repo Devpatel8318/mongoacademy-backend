@@ -6,6 +6,7 @@ import mongodbConfig from './mongodb.config'
 import googleConfig from './google.config'
 import redisConfig from './redis.config'
 import adminConfig from './admin.config'
+import concurrency from './concurrency'
 
 const data = {
 	common: {
@@ -23,5 +24,6 @@ const data = {
 	encryptDecrypt: encryptDecryptConfig,
 	google: googleConfig,
 	redis: redisConfig,
+	concurrency: concurrency,
 }
 export default data

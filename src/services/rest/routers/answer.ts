@@ -4,7 +4,6 @@ import { submitAnswer, evaluateAnswer } from '../controllers/answer.controller'
 
 import validator from '../middlewares/validator'
 import {
-	isQuestionIdValid,
 	isAnswerFieldsValid,
 	doesAnswerQueryExist,
 	isNumberOfDotsValid,
@@ -13,6 +12,8 @@ import {
 	isQueryTypeValid,
 	isQueryFilterValid,
 } from '../validators/answerValidators'
+
+import { isQuestionIdValid } from '../validators/questionValidators'
 
 const router = new Router({ prefix: '/answer' })
 

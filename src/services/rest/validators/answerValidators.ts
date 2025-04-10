@@ -7,14 +7,14 @@ import methodsOnDbCollection from 'utils/mongodb/validQueryTypes'
 export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 	if (!Object.prototype.hasOwnProperty.call(ctx, 'params')) {
 		ctx.state.continueCheckingOtherValidators = false
-		return 'Invalid Question Id'
+		return validationError('Please provide Question Id', 'questionId')
 	}
 
 	const { questionId } = ctx.params
 
 	if (!questionId || isNaN(+questionId)) {
 		ctx.state.continueCheckingOtherValidators = false
-		return 'Invalid Question Id'
+		return validationError('Invalid Question Id', 'questionId')
 	}
 
 	const questionData = await questionQueries.getOneQuestion({
@@ -23,7 +23,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 
 	if (!questionData) {
 		ctx.state.continueCheckingOtherValidators = false
-		return 'Invalid Question Id'
+		return validationError('No question found with this id', 'questionId')
 	}
 
 	ctx.state.shared.question = {
@@ -39,7 +39,7 @@ export const isAnswerFieldsValid = (ctx: Context) => {
 
 	// limit number of fields
 	if (Object.keys(body).length > allowedFields.length) {
-		return 'Invalid amount of fields.'
+		return validationError('Invalid amount of fields.', 'common')
 	}
 
 	// check for invalid fields

@@ -44,7 +44,12 @@ export const submitAnswer = async (ctx: Context) => {
 
 	if (cachedAnswerResponse && cachedQuestionResponse) {
 		if (isEqual(cachedQuestionResponse, cachedAnswerResponse)) {
-			ctx.body = successObject('Correct Answer')
+			ctx.body = successObject('Correct Answer', {
+				questionId,
+				correct: true,
+				expected: cachedQuestionResponse,
+				output: cachedAnswerResponse,
+			})
 			return
 		}
 	} else if (!cachedAnswerResponse && cachedQuestionResponse) {
@@ -121,7 +126,10 @@ export const submitAnswer = async (ctx: Context) => {
 	await pushMessageInSqs(sqsUrl, sqsMessage, messageAttribute)
 
 	ctx.status = 202
-	ctx.body = successObject('Your Submission is being processed')
+	ctx.body = successObject('Your Submission is being processed', {
+		questionId,
+		pending: true,
+	})
 }
 
 export const evaluateAnswer = async (ctx: Context) => {
@@ -154,13 +162,15 @@ export const evaluateAnswer = async (ctx: Context) => {
 		ctx.body = successObject('Correct Answer', {
 			questionId,
 			correct: true,
-			result: response.answer,
+			expected: response.question,
+			output: response.answer,
 		})
 	} else {
 		ctx.body = successObject('Wrong Answer', {
 			questionId,
 			correct: false,
-			result: response.answer,
+			expected: response.question,
+			output: response.answer,
 		})
 	}
 }
