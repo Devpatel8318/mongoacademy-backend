@@ -1,11 +1,9 @@
 import config from 'config'
-import { Context, isEqual, Sort } from 'deps'
+import { Context, isEqual } from 'deps'
 
 import mongoDB from '../../../MongoDb/connection'
-import * as questionQueries from 'queries/questions'
 
 import { successObject } from 'utils/responseObject'
-import { getDataFromRedis, setDataInRedis } from 'utils/redis/redis'
 
 export const checkAnswer = async (ctx: Context) => {
 	const checkExecutionTime = config.common.checkExecutionTime

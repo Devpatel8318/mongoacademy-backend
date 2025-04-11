@@ -40,7 +40,7 @@
 			],
 			"Types/*": [
 				"src/Types/*"
-			]
+			],
 		}
 	},
 	"include": [

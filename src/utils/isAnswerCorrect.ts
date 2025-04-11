@@ -1,4 +1,3 @@
-// import mongoDB from '../MongoDb/connection';
 import * as questionQueries from '../MongoDb/queries/questions'
 
 export default async (questionId: number, input: string) => {
