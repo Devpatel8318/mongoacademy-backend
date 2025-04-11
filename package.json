@@ -9,7 +9,6 @@
 		"lint": "eslint 'src/**/*.ts'",
 		"lint:fix": "eslint 'src/**/*.ts' --fix",
 		"type-check": "tsc --noEmit",
-		"babel-version": "./node_modules/.bin/babel --version",
 		"build": "rimraf dist && ./node_modules/.bin/babel src --out-dir dist --extensions \".ts\"",
 		"prod": "yarn run build && NODE_ENV=production node dist/entry.js",
 		"sanitize": "yarn run type-check && yarn run format && yarn run lint"
@@ -23,6 +22,10 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-sqs": "^3.774.0",
+		"@babel/cli": "^7.27.0",
+		"@babel/core": "^7.26.10",
+		"@babel/preset-env": "^7.26.9",
+		"@babel/preset-typescript": "^7.27.0",
 		"@koa/cors": "^5.0.0",
 		"@koa/router": "^13.1.0",
 		"axios": "^1.8.4",
@@ -43,10 +46,6 @@
 		"mongodb-query-parser": "^4.3.0"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.27.0",
-		"@babel/core": "^7.26.10",
-		"@babel/preset-env": "^7.26.9",
-		"@babel/preset-typescript": "^7.27.0",
 		"@types/bcrypt": "^5.0.2",
 		"@types/bluebird": "^3.5.42",
 		"@types/jsonwebtoken": "^9.0.9",
