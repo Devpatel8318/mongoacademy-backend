@@ -96,6 +96,7 @@ export const getAllQuestions = async (ctx: Context) => {
 			difficulty: 1,
 			questionId: 1,
 		},
+		userId: ctx.state.shared.user.userId,
 	})
 
 	const count = await questionQueries.getQuestionsCount()

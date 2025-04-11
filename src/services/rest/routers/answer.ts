@@ -14,14 +14,18 @@ import {
 	isSocketIdValid,
 } from '../validators/answerValidators'
 
-import { isQuestionIdValid } from '../validators/questionValidators'
+import { isQuestionIdValid } from '../validators/answerValidators'
+import updateStatus from '../middlewares/updateStatus'
+import auth from '../middlewares/auth'
 
 const router = new Router({ prefix: '/answer' })
 
 router.post(
 	'/submit/:questionId',
+	auth,
+	validator([isQuestionIdValid]),
+	updateStatus,
 	validator([
-		isQuestionIdValid,
 		isAnswerFieldsValid,
 		doesAnswerQueryExist,
 		isNumberOfDotsValid,
@@ -36,6 +40,7 @@ router.post(
 
 router.post(
 	'/evaluate/:questionId',
+	auth,
 	validator([isQuestionIdValid]),
 	evaluateAnswer
 )

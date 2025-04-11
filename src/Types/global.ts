@@ -8,3 +8,5 @@ export interface SuccessResponse {
 	message: string
 	data?: Object
 }
+
+export type Status = 'TODO' | 'SOLVED' | 'ATTEMPTED'

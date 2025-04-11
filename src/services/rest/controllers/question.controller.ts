@@ -19,6 +19,7 @@ interface GetAllQuestionsQueryParams {
 }
 
 export const getAllQuestions = async (ctx: Context) => {
+	const { userId } = ctx.state.shared.user
 	const {
 		limit = '20',
 		page = '1',
@@ -89,6 +90,7 @@ export const getAllQuestions = async (ctx: Context) => {
 			difficulty: 1,
 			questionId: 1,
 		},
+		userId,
 	})
 
 	const { data, totalCount } = response[0] || {}
@@ -103,14 +105,14 @@ export const getAllQuestions = async (ctx: Context) => {
 }
 
 export const getSolution = async (ctx: Context) => {
-	const { questionId } = ctx.request.body as { questionId: number }
+	// const { questionId } = ctx.request.body as { questionId: number }
 
-	const response = questionQueries.getAllQuestions({
-		filter: { questionId },
-		projection: { _id: 0 },
-	})
+	// const response = questionQueries.getAllQuestions({
+	// 	filter: { questionId },
+	// 	projection: { _id: 0 },
+	// })
 
-	ctx.body = successObject('', response)
+	ctx.body = successObject('', {})
 }
 
 export interface SingleDataBaseSchema {

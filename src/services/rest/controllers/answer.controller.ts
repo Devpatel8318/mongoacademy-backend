@@ -4,6 +4,7 @@ import { successObject } from 'utils/responseObject'
 import getMd5Hash from 'utils/getMd5Hash'
 import { getDataFromRedis } from 'utils/redis/redis'
 import pushMessageInSqs from 'utils/aws/SQS/pushMessageInSqs'
+import MongoDB from '../../../MongoDb/connection'
 
 export const submitAnswer = async (ctx: Context) => {
 	const {
@@ -146,6 +147,7 @@ export const submitAnswer = async (ctx: Context) => {
 }
 
 export const evaluateAnswer = async (ctx: Context) => {
+	const { userId } = ctx.state.shared.user
 	const { questionId } = ctx.state.shared.question
 	const { question, answer } = ctx.request.body as {
 		question: string
@@ -172,6 +174,17 @@ export const evaluateAnswer = async (ctx: Context) => {
 	}
 
 	if (isEqual(response.question, response.answer)) {
+		await MongoDB.collection('status').updateOne(
+			{
+				userId,
+				questionId,
+			},
+			{
+				$set: {
+					status: 'SOLVED',
+				},
+			}
+		)
 		ctx.body = successObject('Correct Answer', {
 			questionId,
 			correct: true,

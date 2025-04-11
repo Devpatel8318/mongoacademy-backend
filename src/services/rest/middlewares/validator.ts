@@ -12,7 +12,7 @@ interface ValidatorFunction {
 
 const validator = (validatorFunctions: ValidatorFunction[]) => {
 	return async (ctx: Context, next: Next) => {
-		ctx.state.shared = {}
+		ctx.state.shared = { ...ctx.state.shared }
 		ctx.state.validationErrors = [] as string[]
 		ctx.state.continueCheckingOtherValidators = true
 		const response: (string | null | FieldError)[] = []

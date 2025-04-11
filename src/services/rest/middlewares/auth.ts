@@ -25,9 +25,9 @@ const auth = async (ctx: Context, next: Next) => {
 		ctx.throw(401, 'Invalid User3')
 	}
 
-	const { email, profilePictureUrl } = user
+	const { email, profilePictureUrl, userId } = user
 
-	ctx.state.shared = { user: { email, profilePictureUrl } }
+	ctx.state.shared = { user: { email, profilePictureUrl, userId } }
 
 	return next()
 }
