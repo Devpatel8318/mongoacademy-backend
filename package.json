@@ -9,8 +9,8 @@
 		"lint": "eslint 'src/**/*.ts'",
 		"lint:fix": "eslint 'src/**/*.ts' --fix",
 		"type-check": "tsc --noEmit",
-		"babel-version": "babel --version",
-		"build": "rimraf dist && yarn run babel src --out-dir dist --extensions \".ts\"",
+		"babel-version": "npx babel --version",
+		"build": "rimraf dist && npx babel src --out-dir dist --extensions \".ts\"",
 		"prod": "yarn run build && NODE_ENV=production node dist/entry.js",
 		"sanitize": "yarn run type-check && yarn run format && yarn run lint"
 	},
@@ -45,7 +45,6 @@
 	"devDependencies": {
 		"@babel/cli": "^7.27.0",
 		"@babel/core": "^7.26.10",
-		"@babel/node": "^7.26.0",
 		"@babel/preset-env": "^7.26.9",
 		"@babel/preset-typescript": "^7.27.0",
 		"@types/bcrypt": "^5.0.2",
