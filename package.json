@@ -9,8 +9,8 @@
 		"lint": "eslint 'src/**/*.ts'",
 		"lint:fix": "eslint 'src/**/*.ts' --fix",
 		"type-check": "tsc --noEmit",
-		"babel-version": "npx babel --version",
-		"build": "rimraf dist && npx babel src --out-dir dist --extensions \".ts\"",
+		"babel-version": "./node_modules/.bin/babel --version",
+		"build": "rimraf dist && ./node_modules/.bin/babel src --out-dir dist --extensions \".ts\"",
 		"prod": "yarn run build && NODE_ENV=production node dist/entry.js",
 		"sanitize": "yarn run type-check && yarn run format && yarn run lint"
 	},
