@@ -7,10 +7,10 @@ import {
 	isAnswerFieldsValid,
 	doesAnswerQueryExist,
 	isNumberOfDotsValid,
-	isDbNameValid,
 	isCollectionValid,
 	isQueryTypeValid,
 	isQueryFilterValid,
+	isChainedOpsValid,
 } from '../validators/answerValidators'
 
 import { isQuestionIdValid } from '../validators/questionValidators'
@@ -24,10 +24,10 @@ router.post(
 		isAnswerFieldsValid,
 		doesAnswerQueryExist,
 		isNumberOfDotsValid,
-		isDbNameValid,
 		isCollectionValid,
 		isQueryTypeValid,
 		isQueryFilterValid,
+		isChainedOpsValid,
 	]),
 	submitAnswer
 )

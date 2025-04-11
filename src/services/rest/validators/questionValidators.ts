@@ -31,6 +31,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 			collection: 1,
 			queryType: 1,
 			queryFilter: 1,
+			chainedOps: 1,
 			difficultyLabel: {
 				$switch: {
 					branches: [

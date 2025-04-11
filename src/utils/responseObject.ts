@@ -26,7 +26,10 @@ export const successObject = (message = '', data = {}): SuccessResponse => {
 	}
 }
 
-export const validationError = (message: string, field: string): FieldError => {
+export const validationError = (
+	message: string,
+	field?: string
+): FieldError => {
 	return {
 		message: message || 'Validation Failed.',
 		field: field || 'common',

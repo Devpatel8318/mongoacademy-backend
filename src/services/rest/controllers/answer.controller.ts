@@ -6,18 +6,19 @@ import { getDataFromRedis } from 'utils/redis/redis'
 import pushMessageInSqs from 'utils/aws/SQS/pushMessageInSqs'
 
 export const submitAnswer = async (ctx: Context) => {
-	console.log(ctx.state.shared.question)
 	const {
 		questionId,
 		answer: correctQuery,
 		collection: correctCollection,
 		queryType: correctQueryType,
 		queryFilter: correctQueryFilter,
+		chainedOps: correctChainedOps,
 	} = ctx.state.shared.question
 
 	const answer = ctx.state.shared.answer
 
-	const { answerQuery, collection, queryType, queryFilter } = answer
+	const { answerQuery, collection, queryType, queryFilter, chainedOps } =
+		answer
 
 	const Q_HASH = getMd5Hash(correctQuery)
 	const A_HASH = getMd5Hash(answerQuery)
@@ -71,6 +72,7 @@ export const submitAnswer = async (ctx: Context) => {
 					queryType,
 					queryFilter,
 					answerQuery: answerQuery,
+					chainedOps,
 				},
 			},
 		})
@@ -86,6 +88,7 @@ export const submitAnswer = async (ctx: Context) => {
 					queryType: correctQueryType,
 					queryFilter: correctQueryFilter,
 					questionQuery: correctQuery,
+					chainedOps: correctChainedOps,
 				},
 			},
 			answer: {
@@ -105,6 +108,7 @@ export const submitAnswer = async (ctx: Context) => {
 					queryType: correctQueryType,
 					queryFilter: correctQueryFilter,
 					questionQuery: correctQuery,
+					chainedOps: correctChainedOps,
 				},
 			},
 			answer: {
@@ -116,6 +120,7 @@ export const submitAnswer = async (ctx: Context) => {
 					queryType,
 					queryFilter,
 					answerQuery: answerQuery,
+					chainedOps,
 				},
 			},
 		})

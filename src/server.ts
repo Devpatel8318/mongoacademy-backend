@@ -3,6 +3,7 @@
 //TODO: make separate routes for answer and question
 //TODO: change names of queries from get to find like 'findOneQuestion' 'findAllQuestions'
 //TODO: user absolute paths for mongoDb Connection
+//TODO: currently it is compulsory to write {} in find({}), in short mandatory to put empty object, fix that
 import http from 'http'
 import app from './app'
 import config from 'config'
