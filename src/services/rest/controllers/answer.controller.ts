@@ -13,13 +13,18 @@ export const submitAnswer = async (ctx: Context) => {
 		queryType: correctQueryType,
 		queryFilter: correctQueryFilter,
 		chainedOps: correctChainedOps,
-		socketId,
 	} = ctx.state.shared.question
 
 	const answer = ctx.state.shared.answer
 
-	const { answerQuery, collection, queryType, queryFilter, chainedOps } =
-		answer
+	const {
+		answerQuery,
+		collection,
+		queryType,
+		queryFilter,
+		chainedOps,
+		socketId,
+	} = answer
 
 	const Q_HASH = getMd5Hash(correctQuery)
 	const A_HASH = getMd5Hash(answerQuery)
