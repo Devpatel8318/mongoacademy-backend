@@ -1,5 +1,5 @@
 import { Collection } from 'mongodb'
-import MongoDB from 'src/MongoDb/connection'
+import MongoDB from '../../../MongoDb/connection'
 
 const methodsReturningCursor = [
 	'find',
