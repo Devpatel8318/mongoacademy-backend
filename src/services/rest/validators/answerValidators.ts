@@ -35,7 +35,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 
 export const isAnswerFieldsValid = (ctx: Context) => {
 	const body = ctx.request.body as Object
-	const allowedFields = ['answerQuery']
+	const allowedFields = ['answerQuery', 'socketId']
 
 	// limit number of fields
 	if (Object.keys(body).length > allowedFields.length) {
@@ -305,6 +305,18 @@ export const isChainedOpsValid = (ctx: Context) => {
 
 	// Update the validated chainedOps
 	ctx.state.shared.answer.chainedOps = validatedOps
+
+	return null
+}
+
+export const isSocketIdValid = (ctx: Context) => {
+	const { socketId } = ctx.request.body as { socketId: string }
+
+	if (!socketId || !socketId.trim()) {
+		return validationError('Please provide Socket Id', 'socketId')
+	}
+
+	ctx.state.shared.answer.socketId = socketId
 
 	return null
 }

@@ -13,6 +13,7 @@ export const submitAnswer = async (ctx: Context) => {
 		queryType: correctQueryType,
 		queryFilter: correctQueryFilter,
 		chainedOps: correctChainedOps,
+		socketId,
 	} = ctx.state.shared.question
 
 	const answer = ctx.state.shared.answer
@@ -41,7 +42,9 @@ export const submitAnswer = async (ctx: Context) => {
 		},
 		senderId: { DataType: 'Number', StringValue: '6548' },
 	}
-	const sqsMessage = {}
+	const sqsMessage = {
+		socketId,
+	}
 
 	if (cachedAnswerResponse && cachedQuestionResponse) {
 		if (isEqual(cachedQuestionResponse, cachedAnswerResponse)) {

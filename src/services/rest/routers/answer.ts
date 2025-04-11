@@ -11,6 +11,7 @@ import {
 	isQueryTypeValid,
 	isQueryFilterValid,
 	isChainedOpsValid,
+	isSocketIdValid,
 } from '../validators/answerValidators'
 
 import { isQuestionIdValid } from '../validators/questionValidators'
@@ -28,6 +29,7 @@ router.post(
 		isQueryTypeValid,
 		isQueryFilterValid,
 		isChainedOpsValid,
+		isSocketIdValid,
 	]),
 	submitAnswer
 )
