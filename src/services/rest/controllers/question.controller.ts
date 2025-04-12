@@ -105,13 +105,6 @@ export const getAllQuestions = async (ctx: Context) => {
 }
 
 export const getSolution = async (ctx: Context) => {
-	// const { questionId } = ctx.request.body as { questionId: number }
-
-	// const response = questionQueries.fetchAllQuestions({
-	// 	filter: { questionId },
-	// 	projection: { _id: 0 },
-	// })
-
 	ctx.body = successObject('', {})
 }
 
