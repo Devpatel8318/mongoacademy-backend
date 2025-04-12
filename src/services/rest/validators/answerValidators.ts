@@ -320,3 +320,21 @@ export const isSocketIdValid = (ctx: Context) => {
 
 	return null
 }
+
+export const isSubmissionIdValid = (ctx: Context) => {
+	if (
+		!Object.prototype.hasOwnProperty.call(ctx.request.body, 'submissionId')
+	) {
+		return validationError('Please provide Submission Id', 'submissionId')
+	}
+
+	const { submissionId } = ctx.request.body as { submissionId: string }
+
+	if (!submissionId || !submissionId.trim()) {
+		return validationError('Invalid Submission Id', 'submissionId')
+	}
+
+	ctx.state.shared.submissionId = submissionId
+
+	return null
+}

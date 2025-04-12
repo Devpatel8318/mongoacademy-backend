@@ -1,6 +1,10 @@
 import { Router } from 'deps'
 
-import { submitAnswer, evaluateAnswer } from '../controllers/answer.controller'
+import {
+	submitAnswer,
+	evaluateAnswer,
+	submissionList,
+} from '../controllers/answer.controller'
 
 import validator from '../middlewares/validator'
 import {
@@ -12,11 +16,13 @@ import {
 	isQueryFilterValid,
 	isChainedOpsValid,
 	isSocketIdValid,
+	isSubmissionIdValid,
 } from '../validators/answerValidators'
 
 import { isQuestionIdValid } from '../validators/answerValidators'
 import updateStatus from '../middlewares/updateStatus'
 import auth from '../middlewares/auth'
+import addSubmission from '../middlewares/addSubmission'
 
 const router = new Router({ prefix: '/answer' })
 
@@ -35,14 +41,22 @@ router.post(
 		isChainedOpsValid,
 		isSocketIdValid,
 	]),
+	addSubmission,
 	submitAnswer
 )
 
 router.post(
 	'/evaluate/:questionId',
 	auth,
-	validator([isQuestionIdValid]),
+	validator([isQuestionIdValid, isSubmissionIdValid]),
 	evaluateAnswer
+)
+
+router.get(
+	'/submission/list/:questionId',
+	auth,
+	validator([isQuestionIdValid]),
+	submissionList
 )
 
 export default router

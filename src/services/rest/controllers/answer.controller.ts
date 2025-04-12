@@ -25,6 +25,7 @@ export const submitAnswer = async (ctx: Context) => {
 		queryFilter,
 		chainedOps,
 		socketId,
+		submissionId,
 	} = answer
 
 	const Q_HASH = getMd5Hash(correctQuery)
@@ -50,6 +51,7 @@ export const submitAnswer = async (ctx: Context) => {
 	}
 	const sqsMessage = {
 		socketId,
+		submissionId,
 	}
 
 	if (cachedAnswerResponse && cachedQuestionResponse) {
@@ -147,6 +149,7 @@ export const submitAnswer = async (ctx: Context) => {
 }
 
 export const evaluateAnswer = async (ctx: Context) => {
+	const { submissionId } = ctx.state.shared
 	const { userId } = ctx.state.shared.user
 	const { questionId } = ctx.state.shared.question
 	const { question, answer } = ctx.request.body as {
@@ -185,6 +188,15 @@ export const evaluateAnswer = async (ctx: Context) => {
 				},
 			}
 		)
+		await MongoDB.collection('submission').updateOne(
+			{ submissionId },
+			{
+				$set: {
+					status: 'CORRECT',
+				},
+			}
+		)
+
 		ctx.body = successObject('Correct Answer', {
 			questionId,
 			correct: true,
@@ -192,6 +204,14 @@ export const evaluateAnswer = async (ctx: Context) => {
 			output: response.answer,
 		})
 	} else {
+		await MongoDB.collection('submission').updateOne(
+			{ submissionId },
+			{
+				$set: {
+					status: 'INCORRECT',
+				},
+			}
+		)
 		ctx.body = successObject('Wrong Answer', {
 			questionId,
 			correct: false,
@@ -199,4 +219,18 @@ export const evaluateAnswer = async (ctx: Context) => {
 			output: response.answer,
 		})
 	}
+}
+
+export const submissionList = async (ctx: Context) => {
+	const { questionId } = ctx.params
+	const { userId } = ctx.state.shared.user
+
+	const submissionList = await MongoDB.collection('submission')
+		.find({
+			userId,
+			questionId: +questionId,
+		})
+		.toArray()
+
+	ctx.body = successObject('Submission List', submissionList)
 }
