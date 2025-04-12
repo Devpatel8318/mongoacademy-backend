@@ -1,6 +1,8 @@
+import { Status } from 'Types/global'
 import { Context, Sort } from 'deps'
 import { successObject } from 'utils/responseObject'
 import * as questionQueries from 'queries/questions'
+import * as statusQueries from 'queries/status'
 import { getDataFromRedis, setDataInRedis } from 'utils/redis/redis'
 import concurrently from 'utils/concurrently'
 import getMd5Hash from 'utils/getMd5Hash'
@@ -74,32 +76,63 @@ export const getAllQuestions = async (ctx: Context) => {
 
 	const redisData = await getDataFromRedis(redisKey)
 
+	let questionsData
+
 	if (redisData) {
-		ctx.body = successObject('', redisData)
-		return
+		questionsData = redisData
+	} else {
+		questionsData =
+			await questionQueries.fetchAllQuestionsAndCountWithDifficultyLabel({
+				filter: filters,
+				sort,
+				skip,
+				limit: limitNum,
+				projection: {
+					question: 1,
+					status: 1,
+					difficulty: 1,
+					questionId: 1,
+				},
+				userId,
+			})
+
+		await setDataInRedis(redisKey, questionsData, 60 * 60)
 	}
 
-	const response = await questionQueries.fetchAllQuestionsAndCount({
-		filter: filters,
-		sort,
-		skip,
-		limit: limitNum,
-		projection: {
-			question: 1,
-			status: 1,
-			difficulty: 1,
-			questionId: 1,
-		},
-		userId,
-	})
+	const { data, totalCount } = questionsData[0] || {}
 
-	const { data, totalCount } = response[0] || {}
 	const responseObject = {
-		list: data,
 		total: totalCount?.[0]?.total || 0,
 	}
 
-	await setDataInRedis(redisKey, responseObject, 60 * 60)
+	const questionIds = data.map((item: any) => item.questionId)
+
+	const statuses = await statusQueries.fetchStatus({
+		userId,
+		questionId: { $in: questionIds },
+	})
+
+	const STATUS_TEXTS = {
+		1: 'TODO',
+		2: 'ATTEMPTED',
+		3: 'SOLVED',
+	}
+
+	const statusMap = statuses.reduce((acc: Record<string, any>, item: any) => {
+		const { questionId, status } = item as {
+			questionId: number
+			status: Status
+		}
+		acc[questionId] = STATUS_TEXTS[status] || 'TODO'
+		return acc
+	}, {})
+
+	Object.assign(responseObject, {
+		list: data.map((item: any) => ({
+			...item,
+			status: statusMap[item.questionId] || 'TODO',
+		})),
+	})
 
 	ctx.body = successObject('', responseObject)
 }

@@ -1,0 +1,15 @@
+import MongoDB from '../connection'
+
+const collectionName = 'submission'
+
+export const insertOneSubmission = async (doc: object) => {
+	return await MongoDB.collection(collectionName).insertOne(doc)
+}
+
+export const updateOneSubmission = async (filter: object, newDoc: object) => {
+	return await MongoDB.collection(collectionName).updateOne(filter, newDoc)
+}
+
+export const fetchSubmissions = async (filter: object) => {
+	return await MongoDB.collection(collectionName).find(filter).toArray()
+}

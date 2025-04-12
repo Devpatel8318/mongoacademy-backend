@@ -12,6 +12,7 @@ import { isQuestionIdValid } from '../validators/questionValidators'
 
 const router = new Router({ prefix: '/question' })
 
+// TODO: add validators , (limit must be less than approx 500)
 router.get('/list', auth, getAllQuestions)
 
 router.get(

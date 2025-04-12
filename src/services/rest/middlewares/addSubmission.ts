@@ -1,6 +1,6 @@
 import { Context, Next } from 'deps'
-import MongoDB from '../../../MongoDb/connection'
 import crypto from 'crypto'
+import * as submissionQueries from 'queries/submission'
 
 const addSubmission = async (ctx: Context, next: Next) => {
 	const { question, user, answer } = ctx.state.shared
@@ -10,7 +10,7 @@ const addSubmission = async (ctx: Context, next: Next) => {
 
 	const submissionId = crypto.randomUUID()
 
-	await MongoDB.collection('submission').insertOne({
+	await submissionQueries.insertOneSubmission({
 		submissionId,
 		userId,
 		questionId,

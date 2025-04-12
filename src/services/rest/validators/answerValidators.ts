@@ -251,6 +251,9 @@ export const isChainedOpsValid = (ctx: Context) => {
 			)
 		}
 
+		console.log({
+			op,
+		})
 		// Check if operation is in whitelist
 		if (!validChainedOperations.includes(op.operation)) {
 			return validationError(

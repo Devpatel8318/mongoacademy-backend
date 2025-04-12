@@ -4,7 +4,8 @@ import { successObject } from 'utils/responseObject'
 import getMd5Hash from 'utils/getMd5Hash'
 import { getDataFromRedis } from 'utils/redis/redis'
 import pushMessageInSqs from 'utils/aws/SQS/pushMessageInSqs'
-import MongoDB from '../../../MongoDb/connection'
+import * as statusQueries from 'queries/status'
+import * as submissionQueries from 'queries/submission'
 
 export const submitAnswer = async (ctx: Context) => {
 	const {
@@ -177,18 +178,16 @@ export const evaluateAnswer = async (ctx: Context) => {
 	}
 
 	if (isEqual(response.question, response.answer)) {
-		await MongoDB.collection('status').updateOne(
-			{
-				userId,
-				questionId,
-			},
+		await statusQueries.updateOneStatus(
+			{ userId, questionId },
 			{
 				$set: {
 					status: 3,
 				},
 			}
 		)
-		await MongoDB.collection('submission').updateOne(
+
+		await submissionQueries.updateOneSubmission(
 			{ submissionId },
 			{
 				$set: {
@@ -204,7 +203,7 @@ export const evaluateAnswer = async (ctx: Context) => {
 			output: response.answer,
 		})
 	} else {
-		await MongoDB.collection('submission').updateOne(
+		await submissionQueries.updateOneSubmission(
 			{ submissionId },
 			{
 				$set: {
@@ -212,6 +211,7 @@ export const evaluateAnswer = async (ctx: Context) => {
 				},
 			}
 		)
+
 		ctx.body = successObject('Wrong Answer', {
 			questionId,
 			correct: false,
@@ -225,12 +225,17 @@ export const submissionList = async (ctx: Context) => {
 	const { questionId } = ctx.params
 	const { userId } = ctx.state.shared.user
 
-	const submissionList = await MongoDB.collection('submission')
-		.find({
-			userId,
-			questionId: +questionId,
-		})
-		.toArray()
+	const submissionList = await submissionQueries.fetchSubmissions({
+		userId,
+		questionId: +questionId,
+	})
+
+	// const submissionList = await MongoDB.collection('submission')
+	// 	.find({
+	// 		userId,
+	// 		questionId: +questionId,
+	// 	})
+	// 	.toArray()
 
 	ctx.body = successObject('Submission List', submissionList)
 }
