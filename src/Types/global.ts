@@ -9,4 +9,4 @@ export interface SuccessResponse {
 	data?: Object
 }
 
-export type Status = 'TODO' | 'SOLVED' | 'ATTEMPTED'
+export type Status = 1 | 2 | 3 // TODO | ATTEMPTED | SOLVED

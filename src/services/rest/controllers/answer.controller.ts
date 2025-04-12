@@ -184,7 +184,7 @@ export const evaluateAnswer = async (ctx: Context) => {
 			},
 			{
 				$set: {
-					status: 'SOLVED',
+					status: 3,
 				},
 			}
 		)

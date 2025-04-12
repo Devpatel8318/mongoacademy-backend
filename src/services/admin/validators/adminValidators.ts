@@ -80,7 +80,7 @@ export const isCredentialsCorrect = (ctx: Context) => {
 export const doesQuestionExist = async (ctx: Context) => {
 	const { questionId = '' } = ctx.query
 
-	const questionData = await questionQueries.getOneQuestion({
+	const questionData = await questionQueries.fetchOneQuestion({
 		questionId: +questionId,
 	})
 

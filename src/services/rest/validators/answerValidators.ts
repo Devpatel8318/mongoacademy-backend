@@ -17,7 +17,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 		return validationError('Invalid Question Id', 'questionId')
 	}
 
-	const questionData = await questionQueries.getOneQuestion({
+	const questionData = await questionQueries.fetchOneQuestion({
 		questionId: +questionId,
 	})
 

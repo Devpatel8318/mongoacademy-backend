@@ -24,7 +24,7 @@ const updateStatus = async (ctx: Context, next: Next) => {
 		await MongoDB.collection('status').insertOne({
 			userId,
 			questionId,
-			status: 'ATTEMPTED',
+			status: 2,
 		})
 	}
 

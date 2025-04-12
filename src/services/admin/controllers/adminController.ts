@@ -85,7 +85,7 @@ export const getAllQuestions = async (ctx: Context) => {
 	const skip = (pageNum - 1) * limitNum
 
 	// Fetch questions
-	const response = await questionQueries.getAllQuestions({
+	const response = await questionQueries.fetchAllQuestions({
 		skip,
 		limit: limitNum,
 		filter: filters,
@@ -99,7 +99,7 @@ export const getAllQuestions = async (ctx: Context) => {
 		userId: ctx.state.shared.user.userId,
 	})
 
-	const count = await questionQueries.getQuestionsCount()
+	const count = await questionQueries.fetchQuestionsCount()
 
 	ctx.body = successObject('Questions retrieved successfully', {
 		list: response,

@@ -10,10 +10,10 @@ export interface User {
 	profilePictureUrl?: string
 }
 
-export const getUserByEmail = async (email: string) => {
+export const fetchUserByEmail = async (email: string) => {
 	return await mongoDB.collection(collectionName).findOne({ email })
 }
 
-export const createUser = async (userDoc: User) => {
+export const insertUser = async (userDoc: User) => {
 	return await mongoDB.collection(collectionName).insertOne(userDoc)
 }

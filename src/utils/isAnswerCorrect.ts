@@ -1,7 +1,7 @@
 import * as questionQueries from '../MongoDb/queries/questions'
 
 export default async (questionId: number, input: string) => {
-	const question = await questionQueries.getOneQuestion(
+	const question = await questionQueries.fetchOneQuestion(
 		{ questionId },
 		{ answer: 1, _id: 0 }
 	)

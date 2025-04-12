@@ -58,7 +58,7 @@ export const checkAnswer = async (ctx: Context) => {
 // export const getSolution = async (ctx) => {
 //     const { questionId } = ctx.request.body;
 
-//     const response = questionQueries.getAllQuestions(
+//     const response = questionQueries.fetchAllQuestions(
 //         { questionId },
 //         { _id: 0 }
 //     );
@@ -149,7 +149,7 @@ export const checkAnswer = async (ctx: Context) => {
 // 		return
 // 	}
 
-// 	const response = await questionQueries.getAllQuestionsAndCount({
+// 	const response = await questionQueries.fetchAllQuestionsAndCount({
 // 		filter: filters,
 // 		sort,
 // 		skip,

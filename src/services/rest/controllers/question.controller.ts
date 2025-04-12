@@ -79,7 +79,7 @@ export const getAllQuestions = async (ctx: Context) => {
 		return
 	}
 
-	const response = await questionQueries.getAllQuestionsAndCount({
+	const response = await questionQueries.fetchAllQuestionsAndCount({
 		filter: filters,
 		sort,
 		skip,
@@ -107,7 +107,7 @@ export const getAllQuestions = async (ctx: Context) => {
 export const getSolution = async (ctx: Context) => {
 	// const { questionId } = ctx.request.body as { questionId: number }
 
-	// const response = questionQueries.getAllQuestions({
+	// const response = questionQueries.fetchAllQuestions({
 	// 	filter: { questionId },
 	// 	projection: { _id: 0 },
 	// })

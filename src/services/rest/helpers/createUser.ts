@@ -11,7 +11,7 @@ const createUser = async (email: string, data: Object) => {
 		...data,
 	}
 
-	await authQueries.createUser(userDoc)
+	await authQueries.insertUser(userDoc)
 
 	return userId
 }

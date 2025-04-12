@@ -12,7 +12,7 @@ type getAllQuestionsParams = {
 	userId: number
 }
 
-export const getAllQuestions = async ({
+export const fetchAllQuestions = async ({
 	filter = {},
 	projection = {},
 	skip = 0,
@@ -40,7 +40,7 @@ export const getAllQuestions = async ({
 							{
 								$first: '$result.status',
 							},
-							'TODO',
+							1,
 						],
 					},
 				},
@@ -70,13 +70,32 @@ export const getAllQuestions = async ({
 							default: 'UNKNOWN',
 						},
 					},
+					status: {
+						$switch: {
+							branches: [
+								{
+									case: { $eq: ['$status', 1] },
+									then: 'TODO',
+								},
+								{
+									case: { $eq: ['$status', 2] },
+									then: 'ATTEMPTED',
+								},
+								{
+									case: { $eq: ['$status', 3] },
+									then: 'SOLVED',
+								},
+							],
+							default: 'TODO',
+						},
+					},
 				},
 			},
 		])
 		.toArray()
 }
 
-export const getAllQuestionsAndCount = async ({
+export const fetchAllQuestionsAndCount = async ({
 	filter = {},
 	projection = {},
 	skip = 0,
@@ -102,7 +121,7 @@ export const getAllQuestionsAndCount = async ({
 						{
 							$first: '$result.status',
 						},
-						'TODO',
+						1,
 					],
 				},
 			},
@@ -141,6 +160,25 @@ export const getAllQuestionsAndCount = async ({
 									default: 'UNKNOWN',
 								},
 							},
+							status: {
+								$switch: {
+									branches: [
+										{
+											case: { $eq: ['$status', 1] },
+											then: 'TODO',
+										},
+										{
+											case: { $eq: ['$status', 2] },
+											then: 'ATTEMPTED',
+										},
+										{
+											case: { $eq: ['$status', 3] },
+											then: 'SOLVED',
+										},
+									],
+									default: 'TODO',
+								},
+							},
 						},
 					},
 				],
@@ -155,8 +193,8 @@ export const getAllQuestionsAndCount = async ({
 		.toArray()
 }
 
-export const getQuestionsCount = async (filter = {}) =>
+export const fetchQuestionsCount = async (filter = {}) =>
 	await mongoDB.collection(collectionName).countDocuments(filter)
 
-export const getOneQuestion = async (filter = {}, projection = {}) =>
+export const fetchOneQuestion = async (filter = {}, projection = {}) =>
 	await mongoDB.collection(collectionName).findOne(filter, { projection })

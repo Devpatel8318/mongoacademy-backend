@@ -47,7 +47,7 @@ export const loginUser = async (ctx: Context) => {
 export const oauthGoogle = async (ctx: Context) => {
 	const { googleId, email, profilePictureUrl } = ctx.state.shared
 
-	const user = await authQueries.getUserByEmail(email)
+	const user = await authQueries.fetchUserByEmail(email)
 	let successMessage = ''
 	let errorMessage = ''
 

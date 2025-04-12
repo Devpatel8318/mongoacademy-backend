@@ -17,7 +17,7 @@
 // 		return 'Invalid Question Id'
 // 	}
 
-// 	const questionData = await questionQueries.getOneQuestion({
+// 	const questionData = await questionQueries.fetchOneQuestion({
 // 		questionId: +questionId,
 // 	})
 
