@@ -10,6 +10,7 @@ type getAllQuestionsParams = {
 	limit?: number
 	sort?: Sort
 	userId: number
+	onlyShowBookmarked?: boolean
 }
 
 export const fetchAllQuestions = async ({
@@ -101,31 +102,28 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 	skip = 0,
 	limit = 20,
 	sort = { _id: -1 },
-	// userId = 0,
+	onlyShowBookmarked,
 }: getAllQuestionsParams) => {
 	const pipeline = [
 		{ $match: filter },
-		// {
-		// 	$lookup: {
-		// 		from: 'status',
-		// 		localField: 'questionId',
-		// 		foreignField: 'questionId',
-		// 		pipeline: [{ $match: { userId } }],
-		// 		as: 'result',
-		// 	},
-		// },
-		// {
-		// 	$addFields: {
-		// 		status: {
-		// 			$ifNull: [
-		// 				{
-		// 					$first: '$result.status',
-		// 				},
-		// 				1,
-		// 			],
-		// 		},
-		// 	},
-		// },
+		...(onlyShowBookmarked
+			? [
+					{
+						$lookup: {
+							from: 'bookmark',
+							localField: 'questionId',
+							foreignField: 'questionId',
+							pipeline: [{ $match: { userId: 3 } }],
+							as: 'bookmarkResult',
+						},
+					},
+					{
+						$unwind: {
+							path: '$bookmarkResult',
+						},
+					},
+				]
+			: []),
 		{ $sort: sort },
 		{
 			$facet: {
@@ -160,25 +158,6 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 									default: 'UNKNOWN',
 								},
 							},
-							// status: {
-							// 	$switch: {
-							// 		branches: [
-							// 			{
-							// 				case: { $eq: ['$status', 1] },
-							// 				then: 'TODO',
-							// 			},
-							// 			{
-							// 				case: { $eq: ['$status', 2] },
-							// 				then: 'ATTEMPTED',
-							// 			},
-							// 			{
-							// 				case: { $eq: ['$status', 3] },
-							// 				then: 'SOLVED',
-							// 			},
-							// 		],
-							// 		default: 'TODO',
-							// 	},
-							// },
 						},
 					},
 				],
@@ -199,7 +178,7 @@ export const fetchQuestionsCount = async (filter = {}) =>
 export const fetchOneQuestion = async (filter = {}, projection = {}) =>
 	await mongoDB.collection(collectionName).findOne(filter, { projection })
 
-export const fetchQuestionWithDifficultyLabelAndStatusText = async (
+export const fetchQuestionWithDifficultyLabelAndStatusTextAndBookmark = async (
 	filter = {},
 	userId: number,
 	projection = {}
@@ -224,6 +203,22 @@ export const fetchQuestionWithDifficultyLabelAndStatusText = async (
 						},
 						1,
 					],
+				},
+			},
+		},
+		{
+			$lookup: {
+				from: 'bookmark',
+				localField: 'questionId',
+				foreignField: 'questionId',
+				pipeline: [{ $match: { userId } }],
+				as: 'bookmarkResult',
+			},
+		},
+		{
+			$addFields: {
+				isBookmarked: {
+					$gt: [{ $size: '$bookmarkResult' }, 0],
 				},
 			},
 		},

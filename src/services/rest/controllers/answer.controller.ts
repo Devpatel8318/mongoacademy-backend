@@ -222,7 +222,7 @@ export const evaluateAnswer = async (ctx: Context) => {
 }
 
 export const submissionList = async (ctx: Context) => {
-	const { questionId } = ctx.params
+	const { questionId } = ctx.state.shared.question
 	const { userId } = ctx.state.shared.user
 
 	const submissionList = await submissionQueries.fetchSubmissions({

@@ -18,7 +18,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 	}
 
 	const questionData =
-		await questionQueries.fetchQuestionWithDifficultyLabelAndStatusText(
+		await questionQueries.fetchQuestionWithDifficultyLabelAndStatusTextAndBookmark(
 			{ questionId: +questionId },
 			userId,
 			{
@@ -35,6 +35,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 				queryFilter: 1,
 				chainedOps: 1,
 				dataBaseSchema: 1,
+				isBookmarked: 1,
 			}
 		)
 

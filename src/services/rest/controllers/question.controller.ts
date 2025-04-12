@@ -9,6 +9,7 @@ import getMd5Hash from 'utils/getMd5Hash'
 import getDbQueryPromise, {
 	DatabaseSchemaQueryType,
 } from '../helpers/getDbQueryPromise'
+import * as bookmarkQueries from 'queries/bookmark'
 
 interface GetAllQuestionsQueryParams {
 	limit?: string
@@ -18,6 +19,7 @@ interface GetAllQuestionsQueryParams {
 	sortBy?: string
 	sortOrder?: string
 	search?: string
+	onlyShowBookmarked?: string
 }
 
 export const getAllQuestions = async (ctx: Context) => {
@@ -30,6 +32,7 @@ export const getAllQuestions = async (ctx: Context) => {
 		sortBy = '_id',
 		sortOrder = 'DESC',
 		search = '',
+		onlyShowBookmarked = 'false',
 	}: GetAllQuestionsQueryParams = ctx.query
 
 	const limitNum = Number(limit)
@@ -70,11 +73,15 @@ export const getAllQuestions = async (ctx: Context) => {
 
 	const skip = (pageNum - 1) * limitNum
 
+	const onlyShowBookmarkedBool = onlyShowBookmarked === 'true'
+
 	const redisKey = `filter=${JSON.stringify(filters)}:sort=${JSON.stringify(
 		sort
 	)}:page=${skip}-${limitNum}`
 
-	const redisData = await getDataFromRedis(redisKey)
+	const redisData =
+		// if user wanted bookmarked questions in that case, cached data might be old and incorrect
+		!onlyShowBookmarkedBool && (await getDataFromRedis(redisKey))
 
 	let questionsData
 
@@ -94,6 +101,7 @@ export const getAllQuestions = async (ctx: Context) => {
 					questionId: 1,
 				},
 				userId,
+				onlyShowBookmarked: onlyShowBookmarkedBool,
 			})
 
 		await setDataInRedis(redisKey, questionsData, 60 * 60)
@@ -187,4 +195,30 @@ export const viewQuestion = async (ctx: Context) => {
 		...questionData,
 		dataBaseSchema: schemaResponses,
 	})
+}
+
+export const bookmarkQuestion = async (ctx: Context) => {
+	const { questionId } = ctx.state.shared.question
+	const { userId } = ctx.state.shared.user
+
+	const isBookmarked = await bookmarkQueries.fetchOneBookmark(
+		userId,
+		+questionId
+	)
+
+	if (isBookmarked) {
+		bookmarkQueries.deleteOneBookmark(userId, +questionId)
+	} else {
+		bookmarkQueries.insertOneBookmark(userId, +questionId)
+	}
+
+	ctx.body = successObject(
+		isBookmarked
+			? 'Bookmark removed successfully.'
+			: 'Bookmark added successfully.',
+		{
+			questionId,
+			isBookmarked: !isBookmarked,
+		}
+	)
 }

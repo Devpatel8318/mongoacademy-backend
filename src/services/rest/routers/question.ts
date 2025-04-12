@@ -4,6 +4,7 @@ import {
 	getAllQuestions,
 	viewQuestion,
 	getSolution,
+	bookmarkQuestion,
 } from '../controllers/question.controller'
 
 import auth from '../middlewares/auth'
@@ -23,5 +24,12 @@ router.get(
 )
 
 router.post('/solution', auth, getSolution)
+
+router.get(
+	'/bookmark/:questionId',
+	auth,
+	validator([isQuestionIdValid]),
+	bookmarkQuestion
+)
 
 export default router
