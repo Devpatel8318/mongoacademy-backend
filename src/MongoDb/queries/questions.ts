@@ -10,7 +10,7 @@ type getAllQuestionsParams = {
 	limit?: number
 	sort?: Sort
 	userId: number
-	onlyShowBookmarked?: boolean
+	onlyBookmarked?: boolean
 }
 
 export const fetchAllQuestions = async ({
@@ -102,11 +102,11 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 	skip = 0,
 	limit = 20,
 	sort = { _id: -1 },
-	onlyShowBookmarked,
+	onlyBookmarked,
 }: getAllQuestionsParams) => {
 	const pipeline = [
 		{ $match: filter },
-		...(onlyShowBookmarked
+		...(onlyBookmarked
 			? [
 					{
 						$lookup: {
