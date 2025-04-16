@@ -10,6 +10,13 @@ export const updateOneSubmission = async (filter: object, newDoc: object) => {
 	return await MongoDB.collection(collectionName).updateOne(filter, newDoc)
 }
 
-export const fetchSubmissions = async (filter: object) => {
-	return await MongoDB.collection(collectionName).find(filter).toArray()
+export const fetchSubmissions = async (
+	filter: object,
+	project: object = {}
+) => {
+	return await MongoDB.collection(collectionName)
+		.find(filter)
+		.project(project)
+		.sort({ createdAt: -1 })
+		.toArray()
 }

@@ -225,10 +225,15 @@ export const submissionList = async (ctx: Context) => {
 	const { questionId } = ctx.state.shared.question
 	const { userId } = ctx.state.shared.user
 
-	const submissionList = await submissionQueries.fetchSubmissions({
-		userId,
-		questionId: +questionId,
-	})
+	const submissionList = await submissionQueries.fetchSubmissions(
+		{
+			userId,
+			questionId: +questionId,
+		},
+		{
+			_id: 0,
+		}
+	)
 
 	// const submissionList = await MongoDB.collection('submission')
 	// 	.find({
@@ -237,5 +242,8 @@ export const submissionList = async (ctx: Context) => {
 	// 	})
 	// 	.toArray()
 
-	ctx.body = successObject('Submission List', submissionList)
+	ctx.body = successObject('Submission List', {
+		questionId,
+		list: submissionList,
+	})
 }

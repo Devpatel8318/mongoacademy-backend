@@ -53,7 +53,7 @@ router.post(
 )
 
 router.get(
-	'/submission/list/:questionId',
+	'/submissions/:questionId',
 	auth,
 	validator([isQuestionIdValid]),
 	submissionList

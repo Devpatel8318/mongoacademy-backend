@@ -15,7 +15,7 @@ const addSubmission = async (ctx: Context, next: Next) => {
 		userId,
 		questionId,
 		query: answerQuery,
-		createdOn: Date.now(),
+		createdAt: Date.now(),
 		status: 'PENDING',
 	})
 
