@@ -146,7 +146,29 @@ export const getAllQuestions = async (ctx: Context) => {
 }
 
 export const getSolution = async (ctx: Context) => {
-	ctx.body = successObject('', {})
+	const { questionId, answer } = ctx.state.shared.question
+	const { userId } = ctx.state.shared.user
+
+	await statusQueries.updateOneStatus(
+		{ userId, questionId: +questionId },
+		{
+			$setOnInsert: {
+				status: 1,
+				userId,
+				questionId: +questionId,
+			},
+			$set: {
+				isSolutionSeen: true,
+				solutionSeenAt: Date.now(),
+			},
+		},
+		{ upsert: true }
+	)
+
+	ctx.body = successObject('', {
+		questionId,
+		answer,
+	})
 }
 
 export interface SingleDataBaseSchema {

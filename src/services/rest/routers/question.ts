@@ -23,13 +23,18 @@ router.get(
 	viewQuestion
 )
 
-router.post('/solution', auth, getSolution)
-
 router.get(
 	'/bookmark/:questionId',
 	auth,
 	validator([isQuestionIdValid]),
 	bookmarkQuestion
+)
+
+router.get(
+	'/solution/:questionId',
+	auth,
+	validator([isQuestionIdValid]),
+	getSolution
 )
 
 export default router

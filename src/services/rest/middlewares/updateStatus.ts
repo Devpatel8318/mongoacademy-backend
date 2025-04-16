@@ -6,14 +6,17 @@ const updateStatus = async (ctx: Context, next: Next) => {
 	const { userId } = user
 	const { questionId } = question
 
-	const statusDocument = await statusQueries.fetchOneStatus(
-		userId,
-		+questionId
+	await statusQueries.updateOneStatus(
+		{ userId, questionId: +questionId },
+		{
+			$setOnInsert: {
+				userId,
+				questionId: +questionId,
+				status: 1,
+			},
+		},
+		{ upsert: true }
 	)
-
-	if (!statusDocument) {
-		await statusQueries.insertOneStatus(userId, +questionId, 1)
-	}
 
 	return next()
 }
