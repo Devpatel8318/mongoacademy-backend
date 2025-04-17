@@ -2,8 +2,10 @@ import { Router } from 'deps'
 
 import {
 	submitAnswer,
+	runAnswer,
 	evaluateAnswer,
 	submissionList,
+	runOnlyRetrieveData,
 } from '../controllers/answer.controller'
 
 import validator from '../middlewares/validator'
@@ -46,10 +48,35 @@ router.post(
 )
 
 router.post(
+	'/run/:questionId',
+	auth,
+	validator([isQuestionIdValid]),
+	updateStatus,
+	validator([
+		isAnswerFieldsValid,
+		doesAnswerQueryExist,
+		isNumberOfDotsValid,
+		isCollectionValid,
+		isQueryTypeValid,
+		isQueryFilterValid,
+		isChainedOpsValid,
+		isSocketIdValid,
+	]),
+	runAnswer
+)
+
+router.post(
 	'/evaluate/:questionId',
 	auth,
 	validator([isQuestionIdValid, isSubmissionIdValid]),
 	evaluateAnswer
+)
+
+router.post(
+	'/runonly/retrieve/:questionId',
+	auth,
+	validator([isQuestionIdValid]),
+	runOnlyRetrieveData
 )
 
 router.get(

@@ -149,6 +149,84 @@ export const submitAnswer = async (ctx: Context) => {
 	})
 }
 
+export const runAnswer = async (ctx: Context) => {
+	const { questionId } = ctx.state.shared.question
+	const answer = ctx.state.shared.answer
+
+	const {
+		answerQuery,
+		collection,
+		queryType,
+		queryFilter,
+		chainedOps,
+		socketId,
+		submissionId,
+	} = answer
+
+	const A_HASH = getMd5Hash(answerQuery)
+
+	const cachedAnswerResponse = A_HASH && (await getDataFromRedis(A_HASH))
+
+	if (cachedAnswerResponse) {
+		ctx.body = successObject('', {
+			questionId,
+			output: cachedAnswerResponse,
+		})
+		return
+	}
+
+	const dbName = 'db'
+	const sqsUrl = config.aws.sqs.restToQueryProcessorQueue
+	const messageAttribute = {
+		senderEmail: {
+			DataType: 'String',
+			// TODO: change this to actual email
+			StringValue: 'dev@example.com',
+		},
+		// TODO: change this to actual id
+		senderId: { DataType: 'Number', StringValue: '6548' },
+		isRunOnly: {
+			DataType: 'String',
+			StringValue: 'true',
+		},
+	}
+	const sqsMessage = {
+		socketId,
+		submissionId,
+	}
+
+	Object.assign(sqsMessage, {
+		question: {
+			isRunOnly: true,
+			questionId,
+			// * to keep lambda functions clean, pass the question as cached, so that lambda do not run query on question.
+			isResponseCached: true,
+		},
+		answer: {
+			isResponseCached: false,
+			redisKey: A_HASH,
+			data: {
+				dbName,
+				collection,
+				queryType,
+				queryFilter,
+				answerQuery: answerQuery,
+				chainedOps,
+			},
+		},
+	})
+
+	console.dir({ sqsMessage }, { depth: null })
+
+	await pushMessageInSqs(sqsUrl, sqsMessage, messageAttribute)
+
+	ctx.status = 202
+	ctx.body = successObject('Your Submission is being processed', {
+		questionId,
+		pending: true,
+	})
+}
+
 export const evaluateAnswer = async (ctx: Context) => {
 	const { submissionId } = ctx.state.shared
 	const { userId } = ctx.state.shared.user
@@ -174,7 +252,7 @@ export const evaluateAnswer = async (ctx: Context) => {
 			answer: answerResponse.value,
 		}
 	} else {
-		throw new Error('Something went wrong')
+		ctx.throw('Something went wrong')
 	}
 
 	if (isEqual(response.question, response.answer)) {
@@ -246,4 +324,21 @@ export const submissionList = async (ctx: Context) => {
 		questionId,
 		list: submissionList,
 	})
+}
+
+export const runOnlyRetrieveData = async (ctx: Context) => {
+	const { questionId } = ctx.state.shared.question
+	const { answer } = ctx.request.body as { answer: string }
+
+	const answerResponse = await getDataFromRedis(answer)
+
+	if (answerResponse) {
+		ctx.body = successObject('', {
+			questionId,
+			output: answerResponse,
+			isRunOnly: true,
+		})
+	} else {
+		ctx.throw('something went wrong')
+	}
 }
