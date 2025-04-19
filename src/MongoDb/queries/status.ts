@@ -16,7 +16,7 @@ export const fetchOneStatus = async (userId: number, questionId: number) => {
 	})
 }
 
-export const fetchStatus = async (filter: Filter<Document>) => {
+export const fetchStatuses = async (filter: Filter<Document>) => {
 	return await MongoDB.collection(collectionName).find(filter).toArray()
 }
 

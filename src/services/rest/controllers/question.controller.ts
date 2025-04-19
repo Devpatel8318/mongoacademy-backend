@@ -115,7 +115,7 @@ export const getAllQuestions = async (ctx: Context) => {
 
 	const questionIds = data.map((item: any) => item.questionId)
 
-	const statuses = await statusQueries.fetchStatus({
+	const statuses = await statusQueries.fetchStatuses({
 		userId,
 		questionId: { $in: questionIds },
 	})

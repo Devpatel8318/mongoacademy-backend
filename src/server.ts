@@ -1,7 +1,4 @@
 // TODO: add security in submit answer api
-// TODO: replace ctx.throw with failureObject (make new)
-//TODO: make separate routes for answer and question
-//TODO: change names of queries from get to find like 'findOneQuestion' 'findAllQuestions'
 //TODO: user absolute paths for mongoDb Connection
 //TODO: currently it is compulsory to write {} in find({}), in short mandatory to put empty object, fix that
 // TODO: there is variables names like question, answer in retrieveData apis, it should have names like questionRedisKey, answerRedisKey
