@@ -231,14 +231,15 @@ export const evaluateAnswer = async (ctx: Context) => {
 	const { submissionId } = ctx.state.shared
 	const { userId } = ctx.state.shared.user
 	const { questionId } = ctx.state.shared.question
-	const { question, answer } = ctx.request.body as {
+	const { question: questionRedisKey, answer: answerRedisKey } = ctx.request
+		.body as {
 		question: string
 		answer: string
 	}
 
 	const [questionResponse, answerResponse] = await Promise.allSettled([
-		getDataFromRedis(question),
-		getDataFromRedis(answer),
+		getDataFromRedis(questionRedisKey),
+		getDataFromRedis(answerRedisKey),
 	])
 
 	let response: { question?: any; answer?: any } = {}
@@ -328,9 +329,9 @@ export const submissionList = async (ctx: Context) => {
 
 export const runOnlyRetrieveData = async (ctx: Context) => {
 	const { questionId } = ctx.state.shared.question
-	const { answer } = ctx.request.body as { answer: string }
+	const { answer: answerRedisKey } = ctx.request.body as { answer: string }
 
-	const answerResponse = await getDataFromRedis(answer)
+	const answerResponse = await getDataFromRedis(answerRedisKey)
 
 	if (answerResponse) {
 		ctx.body = successObject('', {
