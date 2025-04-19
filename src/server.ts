@@ -1,5 +1,4 @@
 // TODO: add security in submit answer api
-//TODO: user absolute paths for mongoDb Connection
 //TODO: currently it is compulsory to write {} in find({}), in short mandatory to put empty object, fix that
 // TODO: there is variables names like question, answer in retrieveData apis, it should have names like questionRedisKey, answerRedisKey
 import http from 'http'

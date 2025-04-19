@@ -21,7 +21,8 @@
                     "config": "./src/config",
                     "deps": "./src/deps",
                     "queries": "./src/MongoDb/queries",
-                    "Types": "./src/Types"
+                    "Types": "./src/Types",
+                    "MongoDbConnection": "./src/MongoDb/connection"
                 }
             }
         ]

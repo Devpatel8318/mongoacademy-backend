@@ -1,5 +1,5 @@
 import { Sort } from 'deps'
-import mongoDB from '../connection'
+import mongoDB from 'MongoDbConnection'
 
 const collectionName = 'questions'
 

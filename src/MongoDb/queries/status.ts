@@ -5,7 +5,7 @@ import {
 	UpdateFilter,
 	UpdateOptions,
 } from 'mongodb'
-import MongoDB from '../connection'
+import MongoDB from 'MongoDbConnection'
 
 const collectionName = 'status'
 

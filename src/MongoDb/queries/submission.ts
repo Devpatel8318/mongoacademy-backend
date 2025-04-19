@@ -1,4 +1,4 @@
-import MongoDB from '../connection'
+import MongoDB from 'MongoDbConnection'
 
 const collectionName = 'submission'
 
