@@ -38,6 +38,9 @@
 			"queries/*": [
 				"src/MongoDb/queries/*"
 			],
+			"MongoDbConnection": [
+				"src/MongoDb/connection"
+			],
 			"Types/*": [
 				"src/Types/*"
 			],
