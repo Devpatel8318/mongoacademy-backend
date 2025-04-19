@@ -22,7 +22,7 @@ export const isRefreshTokenValid = async (ctx: Context) => {
 		ctx.throw(401, 'Invalid User')
 	}
 
-	const user = await authQueries.fetchUserByEmail(decodedToken.email)
+	const user = await authQueries.fetchOneUserByEmail(decodedToken.email)
 
 	if (!user) {
 		ctx.throw(401, 'Invalid User')
@@ -70,7 +70,7 @@ export const isEmailValid = (ctx: Context) => {
 export const doesUserExist = async (ctx: Context) => {
 	const { email } = ctx.request.body as { email: string }
 
-	const user = await authQueries.fetchUserByEmail(email)
+	const user = await authQueries.fetchOneUserByEmail(email)
 
 	if (!user) {
 		ctx.state.continueCheckingOtherValidators = false
@@ -142,7 +142,7 @@ export const areAuthFieldsValid = (ctx: Context) => {
 export const isEmailAvailable = async (ctx: Context) => {
 	const { email } = ctx.request.body as { email: string }
 
-	const user = await authQueries.fetchUserByEmail(email)
+	const user = await authQueries.fetchOneUserByEmail(email)
 
 	if (user) {
 		return validationError('Email already exists', 'email')

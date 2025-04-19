@@ -8,6 +8,7 @@ import * as statusQueries from 'queries/status'
 import * as submissionQueries from 'queries/submission'
 
 export const submitAnswer = async (ctx: Context) => {
+	const { email, userId } = ctx.state.shared.user
 	const {
 		questionId,
 		answer: correctQuery,
@@ -46,9 +47,9 @@ export const submitAnswer = async (ctx: Context) => {
 	const messageAttribute = {
 		senderEmail: {
 			DataType: 'String',
-			StringValue: 'dev@example.com',
+			StringValue: email,
 		},
-		senderId: { DataType: 'Number', StringValue: '6548' },
+		senderId: { DataType: 'Number', StringValue: userId },
 	}
 	const sqsMessage = {
 		socketId,
@@ -150,6 +151,7 @@ export const submitAnswer = async (ctx: Context) => {
 }
 
 export const runAnswer = async (ctx: Context) => {
+	const { email, userId } = ctx.state.shared.user
 	const { questionId } = ctx.state.shared.question
 	const answer = ctx.state.shared.answer
 
@@ -180,11 +182,9 @@ export const runAnswer = async (ctx: Context) => {
 	const messageAttribute = {
 		senderEmail: {
 			DataType: 'String',
-			// TODO: change this to actual email
-			StringValue: 'dev@example.com',
+			StringValue: email,
 		},
-		// TODO: change this to actual id
-		senderId: { DataType: 'Number', StringValue: '6548' },
+		senderId: { DataType: 'Number', StringValue: userId },
 		isRunOnly: {
 			DataType: 'String',
 			StringValue: 'true',

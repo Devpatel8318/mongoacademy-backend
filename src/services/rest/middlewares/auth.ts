@@ -19,7 +19,7 @@ const auth = async (ctx: Context, next: Next) => {
 		ctx.throw(401, 'Invalid User2')
 	}
 
-	const user = await authQueries.fetchUserByEmail(decodedToken.email)
+	const user = await authQueries.fetchOneUserByEmail(decodedToken.email)
 
 	if (!user) {
 		ctx.throw(401, 'Invalid User3')
