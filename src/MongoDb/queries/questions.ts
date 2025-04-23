@@ -11,6 +11,7 @@ type getAllQuestionsParams = {
 	sort?: Sort
 	userId: number
 	onlyBookmarked?: boolean
+	statusFilter?: Object
 }
 
 export const fetchAllQuestions = async ({
@@ -103,9 +104,39 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 	limit = 20,
 	sort = { _id: -1 },
 	onlyBookmarked,
+	userId,
+	statusFilter = {},
 }: getAllQuestionsParams) => {
 	const pipeline = [
 		{ $match: filter },
+		{
+			$lookup: {
+				from: 'status',
+				localField: 'questionId',
+				foreignField: 'questionId',
+				pipeline: [{ $match: { userId } }],
+				as: 'result',
+			},
+		},
+		{
+			$addFields: {
+				status: {
+					$ifNull: [
+						{
+							$first: '$result.status',
+						},
+						1,
+					],
+				},
+			},
+		},
+		...(statusFilter && Object.keys(statusFilter).length > 0
+			? [
+					{
+						$match: statusFilter,
+					},
+				]
+			: []),
 		...(onlyBookmarked
 			? [
 					{

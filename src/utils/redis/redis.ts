@@ -29,6 +29,9 @@ export const setDataInRedis = async (
 	value: string | object,
 	expireIn?: number
 ): Promise<string | null> => {
+	if (config.redis.doNotCache) {
+		return key
+	}
 	try {
 		const data = typeof value === 'object' ? JSON.stringify(value) : value
 		if (expireIn) {

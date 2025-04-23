@@ -40,14 +40,28 @@ export const getAllQuestions = async (ctx: Context) => {
 	const sortOrderNum = sortOrder === 'ASC' ? 1 : -1
 
 	const filters: Record<string, any> = {}
+	let statusFilter = {}
 
 	if (search) {
 		filters.question = { $regex: search, $options: 'i' }
 	}
 
 	if (status) {
-		filters.status = {
-			$in: status.split(',').map((s) => s.toUpperCase()),
+		statusFilter = {
+			status: {
+				$in: status.split(',').map((s) => {
+					switch (s.toUpperCase()) {
+						case 'TODO':
+							return 1
+						case 'ATTEMPTED':
+							return 2
+						case 'SOLVED':
+							return 3
+						default:
+							return 1
+					}
+				}),
+			},
 		}
 	}
 
@@ -102,6 +116,7 @@ export const getAllQuestions = async (ctx: Context) => {
 				},
 				userId,
 				onlyBookmarked: onlyBookmarkedBool,
+				statusFilter,
 			})
 
 		await setDataInRedis(redisKey, questionsData, 60 * 60)
