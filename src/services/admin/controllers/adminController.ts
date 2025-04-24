@@ -4,15 +4,16 @@ import * as questionQueries from 'queries/questions'
 import { successObject } from 'utils/responseObject'
 import { generateAuthToken } from '../helpers/jwtFunctions'
 import { getCookieParameters } from '../helpers/cookieHelper'
+import { tryCatchSync } from 'utils/tryCatch'
 
-export const loginAdmin = async (ctx: Context) => {
-	try {
+export const loginAdmin = (ctx: Context) => {
+	const [, error] = tryCatchSync(() => {
 		const jwtTokenAccessToken = generateAuthToken('60m')
 		ctx.cookies.set(
 			config.cookie.ADMIN_ACCESS_TOKEN_COOKIE_NAME,
 			jwtTokenAccessToken,
 			getCookieParameters(
-				60 * 60 // 60 minutes
+				1 * 1000 * 60 * 60 // 1 hour
 			)
 		)
 		const jwtTokenRefreshToken = generateAuthToken('30d')
@@ -20,11 +21,13 @@ export const loginAdmin = async (ctx: Context) => {
 			config.cookie.REFRESH_TOKEN_COOKIE_NAME,
 			jwtTokenRefreshToken,
 			getCookieParameters(
-				60 * 60 * 24 * 30, // 30 days
+				1 * 1000 * 60 * 60 * 24 * 30, // 30 days
 				'/admin/refresh'
 			)
 		)
-	} catch {
+	})
+
+	if (error) {
 		throw new Error('Login Failed.')
 	}
 
@@ -114,17 +117,19 @@ export const getOneQuestions = async (ctx: Context) => {
 }
 
 export const provideAccessToken = async (ctx: Context) => {
-	try {
+	const [, error] = tryCatchSync(() => {
 		const jwtTokenAccessToken = generateAuthToken('60m')
 
 		ctx.cookies.set(
 			config.cookie.ADMIN_ACCESS_TOKEN_COOKIE_NAME,
 			jwtTokenAccessToken,
 			getCookieParameters(
-				60 * 60 * 1000 // 60 minutes
+				1 * 1000 * 60 * 60 // 1 hour
 			)
 		)
-	} catch {
+	})
+
+	if (error) {
 		throw new Error('Access Token Failed.')
 	}
 

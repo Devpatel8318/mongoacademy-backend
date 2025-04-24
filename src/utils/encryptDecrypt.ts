@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import config from 'config'
+import { tryCatch } from './tryCatch'
 
 const SALT_LENGTH = 16
 const IV_LENGTH = 12
@@ -52,8 +53,8 @@ export const encrypt = async (text: string): Promise<string> => {
 	return combinedData.toString('base64')
 }
 
-export const decrypt = async (encryptedText: string): Promise<string> => {
-	try {
+export const decrypt = async (encryptedText: string) => {
+	const [result, error] = await tryCatch(async () => {
 		const encryptedData = Buffer.from(encryptedText, 'base64')
 		const salt = encryptedData.slice(0, SALT_LENGTH)
 		const iv = encryptedData.slice(SALT_LENGTH, SALT_LENGTH + IV_LENGTH)
@@ -67,8 +68,12 @@ export const decrypt = async (encryptedText: string): Promise<string> => {
 			decipher.final(),
 		])
 		return decrypted.toString('utf-8')
-	} catch (error) {
+	})
+
+	if (error) {
 		console.error('Decryption error:', error)
 		throw new Error('Decryption failed. Invalid key or corrupted data.')
 	}
+
+	return result
 }

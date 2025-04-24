@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import config from 'config'
+import { tryCatchSync } from 'utils/tryCatch'
 
 const secret = config.jwt.SECRET
 
@@ -14,10 +15,11 @@ export const generateAuthToken = (
 }
 
 export const isTokenValid = (token: string = ''): any => {
-	try {
-		const decoded = jwt.verify(token, secret)
-		return decoded
-	} catch {
-		return false
-	}
+	const [decoded, error] = tryCatchSync(() => {
+		return jwt.verify(token, secret)
+	})
+
+	if (error) return false
+
+	return decoded
 }

@@ -1,6 +1,7 @@
 // TODO: use implementation in which redis only initializes once
 import { Redis } from 'deps'
 import config from 'config'
+import { tryCatch } from 'utils/tryCatch'
 
 const connectObject = {
 	host: config.redis.host,
@@ -32,26 +33,34 @@ export const setDataInRedis = async (
 	if (config.redis.doNotCache) {
 		return key
 	}
-	try {
+
+	const [, error] = await tryCatch(async () => {
 		const data = typeof value === 'object' ? JSON.stringify(value) : value
 		if (expireIn) {
 			await redis.set(key, data, 'EX', expireIn)
 		} else {
 			await redis.set(key, data)
 		}
-		return key
-	} catch (error) {
+	})
+
+	if (error) {
 		console.log('Set data from redis error:', error)
 		return null
 	}
+
+	return key
 }
 
 export const getDataFromRedis = async (key: string): Promise<any> => {
-	try {
+	const [data, error] = await tryCatch(async () => {
 		const data = await redis.get(key)
 		return data ? JSON.parse(data) : null
-	} catch (error) {
+	})
+
+	if (error) {
 		console.log('Get data from redis error:', error)
 		return null
 	}
+
+	return data
 }

@@ -8,6 +8,7 @@ import { successObject } from 'utils/responseObject'
 import * as authQueries from 'queries/auth'
 import createUser from 'services/rest/helpers/createUser'
 import { hashData } from 'utils/hash'
+import { tryCatchSync } from 'utils/tryCatch'
 
 export const signup = async (ctx: Context) => {
 	const { email, password } = ctx.request.body as {
@@ -19,9 +20,11 @@ export const signup = async (ctx: Context) => {
 
 	const userId = await createUser(email, { password: hashedPassword })
 
-	try {
+	const [, error] = tryCatchSync(() => {
 		setAuthCookies(ctx, { email, userId })
-	} catch (error) {
+	})
+
+	if (error) {
 		console.error('SignUp failed error:', error)
 		ctx.throw('Signup Successful, Login Failed.')
 	}
@@ -32,15 +35,15 @@ export const signup = async (ctx: Context) => {
 export const loginUser = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
 
-	try {
-		setAuthCookies(ctx, {
-			email,
-			userId,
-		})
-	} catch (error) {
+	const [, error] = tryCatchSync(() => {
+		setAuthCookies(ctx, { email, userId })
+	})
+
+	if (error) {
 		console.error('Login failed error:', error)
 		ctx.throw('Login Failed.')
 	}
+
 	ctx.body = successObject('Login Successful.')
 }
 
@@ -72,9 +75,11 @@ export const oauthGoogle = async (ctx: Context) => {
 		errorMessage = 'Signup Failed.'
 	}
 
-	try {
+	const [, error] = tryCatchSync(() => {
 		setAuthCookies(ctx, tokenContent)
-	} catch (error) {
+	})
+
+	if (error) {
 		console.error('OAuth failed error:', error)
 		ctx.throw(errorMessage)
 	}
@@ -85,9 +90,11 @@ export const oauthGoogle = async (ctx: Context) => {
 export const provideAccessToken = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
 
-	try {
+	const [, error] = tryCatchSync(() => {
 		setAccessTokenCookie({ ctx, data: { email, userId } })
-	} catch (error) {
+	})
+
+	if (error) {
 		console.error('Refresh Token failed error:', error)
 		ctx.throw('Refresh Token Failed.')
 	}
@@ -96,7 +103,7 @@ export const provideAccessToken = async (ctx: Context) => {
 }
 
 export const logoutUser = async (ctx: Context) => {
-	try {
+	const [, error] = tryCatchSync(() => {
 		setAccessTokenCookie({ ctx, data: {}, maxAge: 0 })
 		setRefreshTokenCookie({
 			ctx,
@@ -104,7 +111,9 @@ export const logoutUser = async (ctx: Context) => {
 			maxAge: 0,
 			path: '/auth/refresh',
 		})
-	} catch (error) {
+	})
+
+	if (error) {
 		console.error('Logout failed error:', error)
 		ctx.throw('Logout Failed.')
 	}

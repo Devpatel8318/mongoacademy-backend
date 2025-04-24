@@ -3,6 +3,7 @@ import { Context, isFilterValid } from 'deps'
 import * as questionQueries from '../../../MongoDb/queries/questions'
 import { validationError } from 'utils/responseObject'
 import methodsOnDbCollection from 'utils/mongodb/validQueryTypes'
+import { tryCatchSync } from 'utils/tryCatch'
 
 export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 	if (!Object.prototype.hasOwnProperty.call(ctx, 'params')) {
@@ -271,7 +272,8 @@ export const isChainedOpsValid = (ctx: Context) => {
 		// Validate params based on operation type
 		if (op.operation === 'sort' || op.operation === 'project') {
 			// These should be objects
-			try {
+
+			const [, error] = tryCatchSync(() => {
 				const paramsValid = isFilterValid(op.params)
 
 				if (!paramsValid) {
@@ -282,7 +284,10 @@ export const isChainedOpsValid = (ctx: Context) => {
 				}
 
 				validatedOp.params = paramsValid
-			} catch (error) {
+				return true
+			})
+
+			if (error) {
 				console.log({ error })
 				return validationError(
 					`Invalid JSON in params for ${op.operation}`,

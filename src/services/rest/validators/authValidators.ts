@@ -6,6 +6,7 @@ import { emailValidator } from 'utils/emailValidator'
 
 import * as authQueries from 'queries/auth'
 import { verifyHash } from 'utils/hash'
+import { tryCatch } from 'utils/tryCatch'
 
 export const isRefreshTokenValid = async (ctx: Context) => {
 	const refreshToken = ctx.cookies.get(
@@ -187,57 +188,74 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 
 	//  google One Tap login (ID token)
 	if (credential) {
-		try {
-			const { data: googleUser } = await axios.get(
+		const [googleUser, error] = await tryCatch<{
+			sub: string
+			email: string
+			picture: string
+		}>(
+			axios.get(
 				`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`
 			)
+		)
 
-			const { sub, email, picture } = googleUser
-
-			ctx.state.shared = {
-				googleId: sub,
-				email,
-				profilePictureUrl: picture,
-			}
-		} catch (error) {
+		if (error) {
 			console.error('Google One Tap token verification failed:', error)
 			return validationError('Invalid token', 'credential')
+		}
+
+		const { sub, email, picture } = googleUser
+
+		ctx.state.shared = {
+			googleId: sub,
+			email,
+			profilePictureUrl: picture,
 		}
 	}
 
 	// OAuth Google login/signup (Authorization Code)
 	if (code) {
-		try {
-			const { data: tokenResponse } = await axios.post(
-				'https://oauth2.googleapis.com/token',
-				{
-					client_id: config.google.googleClientId,
-					client_secret: config.google.googleClientSecret,
-					code,
-					grant_type: 'authorization_code',
-					redirect_uri: 'postmessage',
-				}
-			)
+		const [tokenResponse, tokenError] = await tryCatch<{
+			access_token: string
+		}>(
+			axios.post('https://oauth2.googleapis.com/token', {
+				client_id: config.google.googleClientId,
+				client_secret: config.google.googleClientSecret,
+				code,
+				grant_type: 'authorization_code',
+				redirect_uri: 'postmessage',
+			})
+		)
 
-			const { access_token } = tokenResponse
-
-			const { data: googleUser } = await axios.get(
-				'https://www.googleapis.com/oauth2/v2/userinfo',
-				{
-					headers: { Authorization: `Bearer ${access_token}` },
-				}
-			)
-
-			const { id, email, picture } = googleUser
-
-			ctx.state.shared = {
-				googleId: id,
-				email,
-				profilePictureUrl: picture,
-			}
-		} catch (error) {
-			console.error('Google OAuth token exchange failed:', error)
+		if (tokenError) {
+			console.error('Google OAuth token exchange failed:', tokenError)
 			return validationError('Invalid authorization code', 'code')
+		}
+
+		const [googleUser, userInfoError] = await tryCatch<{
+			id: string
+			email: string
+			picture: string
+		}>(
+			axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+				headers: {
+					Authorization: `Bearer ${tokenResponse.access_token}`,
+				},
+			})
+		)
+		if (userInfoError) {
+			console.error(
+				'Google OAuth user info retrieval failed:',
+				userInfoError
+			)
+			return validationError('Invalid authorization code', 'code')
+		}
+
+		const { id, email, picture } = googleUser
+
+		ctx.state.shared = {
+			googleId: id,
+			email,
+			profilePictureUrl: picture,
 		}
 	}
 
