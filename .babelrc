@@ -20,9 +20,10 @@
                     "utils": "./src/utils",
                     "config": "./src/config",
                     "deps": "./src/deps",
-                    "queries": "./src/MongoDb/queries",
+                    "queries": "./src/connection/MongoDb/queries",
                     "Types": "./src/Types",
-                    "MongoDbConnection": "./src/MongoDb/connection"
+                    "MongoDbConnection": "./src/connection/MongoDb/connection",
+                    "redisQueries": "./src/connection/redis/queries"
                 }
             }
         ]

@@ -3,7 +3,7 @@ import { Context, Sort } from 'deps'
 import { successObject } from 'utils/responseObject'
 import * as questionQueries from 'queries/questions'
 import * as statusQueries from 'queries/status'
-import { getDataFromRedis, setDataInRedis } from 'utils/redis/redis'
+import { getDataFromRedis, setDataInRedis } from 'redisQueries'
 import concurrently from 'utils/concurrently'
 import getMd5Hash from 'utils/getMd5Hash'
 import getDbQueryPromise, {

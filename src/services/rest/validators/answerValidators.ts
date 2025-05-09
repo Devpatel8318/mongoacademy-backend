@@ -1,6 +1,6 @@
 import { ValidatorContext } from '../middlewares/validator'
 import { Context, isFilterValid } from 'deps'
-import * as questionQueries from '../../../MongoDb/queries/questions'
+import * as questionQueries from 'queries/questions'
 import { validationError } from 'utils/responseObject'
 import methodsOnDbCollection from 'utils/mongodb/validQueryTypes'
 import { tryCatchSync } from 'utils/tryCatch'

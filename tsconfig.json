@@ -36,13 +36,16 @@
 				"src/deps"
 			],
 			"queries/*": [
-				"src/MongoDb/queries/*"
+				"src/connection/MongoDb/queries/*"
 			],
 			"MongoDbConnection": [
-				"src/MongoDb/connection"
+				"src/connection/MongoDb/connection"
 			],
 			"Types/*": [
 				"src/Types/*"
+			],
+			"redisQueries": [
+				"src/connection/redis/queries"
 			],
 		}
 	},

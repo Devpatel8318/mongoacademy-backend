@@ -1,5 +1,5 @@
 import { ValidatorContext } from '../middlewares/validator'
-import * as questionQueries from '../../../MongoDb/queries/questions'
+import * as questionQueries from 'queries/questions'
 import { validationError } from 'utils/responseObject'
 
 export const isQuestionIdValid = async (ctx: ValidatorContext) => {
