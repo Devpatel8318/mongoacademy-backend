@@ -21,7 +21,9 @@
 		"node": ">=22.0.0"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.806.0",
 		"@aws-sdk/client-sqs": "^3.774.0",
+		"@aws-sdk/cloudfront-signer": "^3.804.0",
 		"@babel/cli": "^7.27.0",
 		"@babel/core": "^7.26.10",
 		"@babel/preset-env": "^7.26.9",

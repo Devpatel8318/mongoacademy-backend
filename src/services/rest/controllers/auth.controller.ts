@@ -9,6 +9,8 @@ import * as authQueries from 'queries/auth'
 import createUser from 'services/rest/helpers/createUser'
 import { hashData } from 'utils/hash'
 import { tryCatchSync } from 'utils/tryCatch'
+import { uploadImageFromUrlToS3 } from 'utils/aws/S3/uploadMediaToS3'
+import buckets from 'utils/aws/S3/buckets'
 
 export const signup = async (ctx: Context) => {
 	const { email, password } = ctx.request.body as {
@@ -64,7 +66,7 @@ export const oauthGoogle = async (ctx: Context) => {
 		}
 		Object.assign(tokenContent, { userId: user.userId })
 
-		successMessage = 'Login Successful'
+		successMessage = 'Login Successful.'
 		errorMessage = 'Login Failed.'
 	} else {
 		// Signup
@@ -83,6 +85,13 @@ export const oauthGoogle = async (ctx: Context) => {
 		console.error('OAuth failed error:', error)
 		ctx.throw(errorMessage)
 	}
+
+	// update profile picture in s3
+	await uploadImageFromUrlToS3(
+		profilePictureUrl,
+		email,
+		buckets.profilePicturesBucket
+	)
 
 	ctx.body = successObject(successMessage)
 }

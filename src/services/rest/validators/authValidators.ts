@@ -189,9 +189,7 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 	//  google One Tap login (ID token)
 	if (credential) {
 		const [googleUser, error] = await tryCatch<{
-			sub: string
-			email: string
-			picture: string
+			data: { sub: string; email: string; picture: string }
 		}>(
 			axios.get(
 				`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`
@@ -203,7 +201,7 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 			return validationError('Invalid token', 'credential')
 		}
 
-		const { sub, email, picture } = googleUser
+		const { sub, email, picture } = googleUser.data || {}
 
 		ctx.state.shared = {
 			googleId: sub,

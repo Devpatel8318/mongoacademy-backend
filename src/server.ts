@@ -1,5 +1,6 @@
 // TODO: add security in submit answer api
 //TODO: currently it is compulsory to write {} in find({}), in short mandatory to put empty object, fix that
+//TODO: try to remove credentials from aws, as it might take it from env automatically
 import http from 'http'
 import app from './app'
 import config from 'config'
