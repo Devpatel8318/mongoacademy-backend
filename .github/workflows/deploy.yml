@@ -28,13 +28,6 @@ jobs:
       - name: Run build
         run: yarn build
 
-  deploy:
-    needs: install-lint-build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Zip source code
         run: zip -r app.zip . -x '*.git*' 'node_modules/*' '*.log'
 
