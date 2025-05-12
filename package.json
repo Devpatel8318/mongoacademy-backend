@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
-		"start": "tsx src/server.ts",
+		"start": "NODE_ENV=production node dist/entry.js",
 		"dev": "NODE_ENV=development nodemon",
 		"format": "prettier --write 'src/**/*.ts'",
 		"lint": "eslint 'src/**/*.ts'",

@@ -1,0 +1,50 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  install-lint-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run type-check
+        run: yarn type-check
+
+      - name: Run format
+        run: yarn format
+
+      - name: Run lint
+        run: yarn lint
+
+      - name: Run build
+        run: yarn build
+
+  deploy:
+    needs: install-lint-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Zip source code
+        run: zip -r app.zip . -x '*.git*' 'node_modules/*' '*.log'
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: mongoacademy-backend
+          environment_name: mongoacademy-backend-prod
+          region: ap-south-1
+          version_label: v-${{ github.run_number }}
+          deployment_package: app.zip
