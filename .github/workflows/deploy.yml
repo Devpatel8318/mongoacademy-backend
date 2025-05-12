@@ -31,6 +31,10 @@ jobs:
       - name: Zip source code
         run: zip -r app.zip . -x '*.git*' 'node_modules/*' '*.log'
 
+      - name: Generate timestamp
+        id: timestamp
+        run: echo "value=$(date +'%d-%m-%Y-%H-%M-%S')" >> $GITHUB_OUTPUT
+
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v20
         with:
@@ -39,5 +43,7 @@ jobs:
           application_name: mongoacademy-backend
           environment_name: mongoacademy-backend-prod
           region: ap-south-1
-          version_label: v-${{ github.run_number }}-${{ github.sha }}
+          version_label: v-${{ github.run_number }}-${{ steps.timestamp.outputs.value }}
           deployment_package: app.zip
+          delete_old_versions: true
+          max_versions_to_keep: 100
