@@ -45,5 +45,3 @@ jobs:
           region: ap-south-1
           version_label: v-${{ github.run_number }}-${{ steps.timestamp.outputs.value }}
           deployment_package: app.zip
-          delete_old_versions: true
-          max_versions_to_keep: 100
