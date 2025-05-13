@@ -6,7 +6,7 @@ import {
 	GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager'
 
-const nodeEnv = process.env.NODE_ENV || 'development'
+const nodeEnv = process.env.NODE_ENV || 'production'
 console.log('Environment=>', nodeEnv)
 
 const isLocal = nodeEnv === 'development'
