@@ -11,7 +11,8 @@
 		"type-check": "tsc --noEmit",
 		"build": "rimraf dist && ./node_modules/.bin/babel src --out-dir dist --extensions \".ts\"",
 		"prod": "yarn run build && NODE_ENV=production node dist/entry.js",
-		"sanitize": "yarn run type-check && yarn run format && yarn run lint"
+		"sanitize": "yarn run type-check && yarn run format && yarn run lint",
+		"manual:deploy": "node src/scripts/manualDeploy.mjs"
 	},
 	"keywords": [],
 	"author": "",
