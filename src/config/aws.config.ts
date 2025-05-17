@@ -14,6 +14,7 @@ export default {
 	cloudFront: {
 		cloudFrontUrl: process.env.CLOUDFRONT_URL || '',
 		keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID || '',
-		privateKey: process.env.CLOUDFRONT_PRIVATE_KEY || '',
+		privateKey:
+			process.env.CLOUDFRONT_PRIVATE_KEY?.replace(/\\n/g, '\n') || '',
 	},
 }
