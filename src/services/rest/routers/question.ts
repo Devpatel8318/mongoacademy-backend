@@ -23,7 +23,7 @@ router.get(
 	viewQuestion
 )
 
-router.get(
+router.post(
 	'/bookmark/:questionId',
 	auth,
 	validator([isQuestionIdValid]),
