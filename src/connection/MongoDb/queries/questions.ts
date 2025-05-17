@@ -144,7 +144,7 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 							from: 'bookmark',
 							localField: 'questionId',
 							foreignField: 'questionId',
-							pipeline: [{ $match: { userId: 3 } }],
+							pipeline: [{ $match: { userId } }],
 							as: 'bookmarkResult',
 						},
 					},
