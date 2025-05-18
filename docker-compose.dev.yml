@@ -1,10 +1,10 @@
 services:
-  express-app-dev:
+  backend-dev:
+    container_name: backend-dev
     build:
       context: .
       # only builds upto development stage
       target: development
-    container_name: express-app-dev
     volumes:
       - .:/app
       - /app/node_modules

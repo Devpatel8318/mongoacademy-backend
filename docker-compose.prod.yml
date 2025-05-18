@@ -1,9 +1,9 @@
 services:
-  express-app:
+  backend-prod:
+    container_name: backend-prod
     build:
       context: .
       target: production
-    container_name: express-app-prod
     ports:
       - "8080:8080"
     environment:
