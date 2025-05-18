@@ -244,9 +244,9 @@ export const bookmarkQuestion = async (ctx: Context) => {
 	)
 
 	if (isBookmarked) {
-		bookmarkQueries.deleteOneBookmark(userId, +questionId)
+		await bookmarkQueries.deleteOneBookmark(userId, +questionId)
 	} else {
-		bookmarkQueries.insertOneBookmark(userId, +questionId)
+		await bookmarkQueries.insertOneBookmark(userId, +questionId)
 	}
 
 	ctx.body = successObject(

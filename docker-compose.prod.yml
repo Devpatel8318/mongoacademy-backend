@@ -1,0 +1,14 @@
+services:
+  express-app:
+    build:
+      context: .
+      target: production
+    container_name: express-app-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - path: .env.production
+        required: true
+    restart: unless-stopped

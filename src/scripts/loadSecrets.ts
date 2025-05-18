@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-dotenv.config()
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
 
 import {
 	SecretsManagerClient,
@@ -7,7 +7,6 @@ import {
 } from '@aws-sdk/client-secrets-manager'
 
 const nodeEnv = process.env.NODE_ENV || 'production'
-console.log('Environment=>', nodeEnv)
 
 const isLocal = nodeEnv === 'development'
 

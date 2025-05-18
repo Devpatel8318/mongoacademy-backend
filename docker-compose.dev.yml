@@ -1,0 +1,17 @@
+services:
+  express-app-dev:
+    build:
+      context: .
+      # only builds upto development stage
+      target: development
+    container_name: express-app-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - path: .env.development
+        required: true

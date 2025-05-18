@@ -31,7 +31,7 @@ jobs:
         run: yarn build
 
       - name: Zip source code
-        run: zip -r app.zip . -x '*.git*' 'node_modules/*' '*.log' '.env*'
+        run: zip -r app.zip . -x '*.git*' 'node_modules/*' '*.log' '.env.development*'
 
       - name: Generate timestamp
         id: timestamp

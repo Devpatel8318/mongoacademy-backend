@@ -46,3 +46,5 @@ koa-cache/
 .aws/
 
 *.rdb
+
+tsconfig.tsbuildinfo
