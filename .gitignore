@@ -1,13 +1,18 @@
-# TypeScript build cache
-/.tsbuildinfo
-
 # Node modules
 /node_modules
+
+# Build output
+/dist
+/build
+
+# TypeScript build cache
+/.tsbuildinfo
+tsconfig.tsbuildinfo
+*.tsbuildinfo
 
 # Environment variables
 .env
 .env.*
-.env.local
 .env.*.local
 
 # Log files
@@ -34,17 +39,10 @@ coverage/
 *.lcov
 test-results/
 
-# Build output
-/dist
-/build
-
 # Koa-specific
 koa-logs/
 koa-cache/
 
 # AWS or cloud services (if applicable)
 .aws/
-
 *.rdb
-
-tsconfig.tsbuildinfo

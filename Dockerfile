@@ -5,17 +5,16 @@ FROM node:22-alpine AS base
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-COPY yarn.lock ./
+COPY package*.json yarn.lock ./
+
+# ---- Dependencies Stage ----
+FROM base AS dependencies
+
+# Install all dependencies
+RUN yarn install --frozen-lockfile
 
 # ---- Development Stage ----
-FROM base AS development
-
-# Install all dependencies (including devDependencies)
-RUN yarn install
-
-# Copy all files
-COPY . .
+FROM dependencies AS development
 
 # Set NODE_ENV
 ENV NODE_ENV=development
@@ -23,14 +22,14 @@ ENV NODE_ENV=development
 # Expose development port
 EXPOSE 9050
 
+# Copy all files
+COPY . .
+
 # Start development server with hot-reload
 CMD ["yarn", "dev"]
 
 # ---- Build Stage ----
-FROM base AS builder
-
-# Install all dependencies (including devDependencies)
-RUN yarn install
+FROM dependencies AS builder
 
 # Copy all files
 COPY . .
@@ -41,17 +40,17 @@ RUN yarn build
 # ---- Production Stage ----
 FROM base AS production
 
-# Install only production dependencies
-RUN yarn install --production
-
-# Copy built files from build stage
-COPY --from=builder /app/dist ./dist
-
 # Set NODE_ENV
 ENV NODE_ENV=production
 
 # Expose production port
 EXPOSE 9050
+
+# Install only production dependencies
+RUN yarn install --production --frozen-lockfile && yarn cache clean
+
+# Copy built files from build stage
+COPY --from=builder /app/dist ./dist
 
 # Start the application
 CMD ["yarn", "start"]
