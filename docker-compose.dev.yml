@@ -9,9 +9,18 @@ services:
       - .:/app
       - /app/node_modules
     ports:
-      - "3000:3000"
+      - "9050:9050"
     environment:
       - NODE_ENV=development
+      - REDIS_HOST=redis
     env_file:
       - path: .env.development
         required: true
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"

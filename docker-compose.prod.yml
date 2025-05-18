@@ -5,7 +5,7 @@ services:
       target: production
     container_name: express-app-prod
     ports:
-      - "3000:3000"
+      - "9050:9050"
     environment:
       - NODE_ENV=production
     env_file:

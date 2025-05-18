@@ -21,7 +21,7 @@ COPY . .
 ENV NODE_ENV=development
 
 # Expose development port
-EXPOSE 3000
+EXPOSE 9050
 
 # Start development server with hot-reload
 CMD ["yarn", "dev"]
@@ -51,7 +51,7 @@ COPY --from=builder /app/dist ./dist
 ENV NODE_ENV=production
 
 # Expose production port
-EXPOSE 3000
+EXPOSE 9050
 
 # Start the application
 CMD ["yarn", "start"]
