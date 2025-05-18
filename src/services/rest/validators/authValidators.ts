@@ -13,7 +13,7 @@ export const isRefreshTokenValid = async (ctx: Context) => {
 		config.cookie.REFRESH_TOKEN_COOKIE_NAME
 	)
 
-	if (!refreshToken || typeof refreshToken !== 'string') {
+	if (!refreshToken) {
 		ctx.throw(401, 'Invalid User')
 	}
 

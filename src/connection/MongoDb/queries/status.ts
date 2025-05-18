@@ -1,10 +1,4 @@
-import {
-	Document,
-	Filter,
-	OptionalId,
-	UpdateFilter,
-	UpdateOptions,
-} from 'mongodb'
+import { Document, Filter, UpdateFilter, UpdateOptions } from 'mongodb'
 import MongoDB from 'MongoDbConnection'
 
 const collectionName = 'status'

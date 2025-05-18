@@ -7,6 +7,7 @@
 		"outDir": "dist",
 		"strict": true,
 		"strictNullChecks": true,
+		"allowJs": true,
 		"checkJs": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
@@ -47,7 +48,7 @@
 			],
 			"redisQueries": [
 				"src/connection/redis/queries"
-			],
+			]
 		}
 	},
 	"include": [

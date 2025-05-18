@@ -9,7 +9,7 @@ const auth = async (ctx: Context, next: Next) => {
 	const accessTokenName = config.cookie.ACCESS_TOKEN_COOKIE_NAME
 	const cookie = ctx.cookies.get(accessTokenName)
 
-	if (!cookie || typeof cookie !== 'string') {
+	if (!cookie) {
 		ctx.throw(401, 'Invalid Use1')
 	}
 

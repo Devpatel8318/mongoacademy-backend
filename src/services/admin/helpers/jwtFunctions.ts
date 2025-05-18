@@ -19,7 +19,5 @@ export const isTokenValid = (token: string = ''): boolean => {
 		jwt.verify(token, secret)
 	})
 
-	if (error) return false
-
-	return true
+	return !error
 }
