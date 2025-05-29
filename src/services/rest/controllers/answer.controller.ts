@@ -49,7 +49,7 @@ export const submitAnswer = async (ctx: Context) => {
 			DataType: 'String',
 			StringValue: email,
 		},
-		senderId: { DataType: 'Number', StringValue: userId },
+		senderId: { DataType: 'Number', StringValue: `${userId}` },
 	}
 	const sqsMessage = {
 		socketId,
@@ -241,6 +241,9 @@ export const evaluateAnswer = async (ctx: Context) => {
 		getDataFromRedis(questionRedisKey),
 		getDataFromRedis(answerRedisKey),
 	])
+
+	console.log('answerRedisKey', answerRedisKey)
+	console.log('answerResponse', answerResponse)
 
 	let response: { question?: any; answer?: any } = {}
 
