@@ -213,10 +213,6 @@ export const isQueryTypeValid = (ctx: Context) => {
 export const isQueryFilterValid = (ctx: Context) => {
 	const { queryFilter } = ctx.state.shared.answer
 
-	if (!queryFilter || !queryFilter.trim()) {
-		return validationError('Invalid Query Filter', 'queryFilter')
-	}
-
 	const isFilterValidResponse = isFilterValid(queryFilter)
 
 	if (!isFilterValidResponse) {

@@ -6,6 +6,7 @@ import { getDataFromRedis } from 'redisQueries'
 import pushMessageInSqs from 'utils/aws/SQS/pushMessageInSqs'
 import * as statusQueries from 'queries/status'
 import * as submissionQueries from 'queries/submission'
+import { SubmissionStatusEnum } from 'Types/submissionStatus'
 
 export const submitAnswer = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
@@ -58,14 +59,48 @@ export const submitAnswer = async (ctx: Context) => {
 
 	if (cachedAnswerResponse && cachedQuestionResponse) {
 		if (isEqual(cachedQuestionResponse, cachedAnswerResponse)) {
+			await statusQueries.updateOneStatus(
+				{ userId, questionId },
+				{
+					$set: {
+						status: 3,
+					},
+				}
+			)
+
+			await submissionQueries.updateOneSubmission(
+				{ submissionId },
+				{
+					$set: {
+						status: SubmissionStatusEnum.CORRECT,
+					},
+				}
+			)
+
 			ctx.body = successObject('Correct Answer', {
 				questionId,
 				correct: true,
 				expected: cachedQuestionResponse,
 				output: cachedAnswerResponse,
 			})
-			return
+		} else {
+			await submissionQueries.updateOneSubmission(
+				{ submissionId },
+				{
+					$set: {
+						status: SubmissionStatusEnum.INCORRECT,
+					},
+				}
+			)
+
+			ctx.body = successObject('Wrong Answer', {
+				questionId,
+				correct: false,
+				expected: cachedQuestionResponse,
+				output: cachedAnswerResponse,
+			})
 		}
+		return
 	} else if (!cachedAnswerResponse && cachedQuestionResponse) {
 		Object.assign(sqsMessage, {
 			question: {
@@ -173,6 +208,7 @@ export const runAnswer = async (ctx: Context) => {
 		ctx.body = successObject('', {
 			questionId,
 			output: cachedAnswerResponse,
+			isRunOnly: true,
 		})
 		return
 	}
@@ -273,7 +309,7 @@ export const evaluateAnswer = async (ctx: Context) => {
 			{ submissionId },
 			{
 				$set: {
-					status: 'CORRECT',
+					status: SubmissionStatusEnum.CORRECT,
 				},
 			}
 		)
@@ -289,7 +325,7 @@ export const evaluateAnswer = async (ctx: Context) => {
 			{ submissionId },
 			{
 				$set: {
-					status: 'INCORRECT',
+					status: SubmissionStatusEnum.INCORRECT,
 				},
 			}
 		)
