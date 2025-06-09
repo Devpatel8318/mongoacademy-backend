@@ -1,7 +1,7 @@
 import { Context, Next } from 'deps'
 import crypto from 'crypto'
 import * as submissionQueries from 'queries/submission'
-import { SubmissionStatusEnum } from 'Types/submissionStatus'
+import { SubmissionStatusEnum } from 'Types/enums'
 
 const addSubmission = async (ctx: Context, next: Next) => {
 	const { question, user, answer } = ctx.state.shared

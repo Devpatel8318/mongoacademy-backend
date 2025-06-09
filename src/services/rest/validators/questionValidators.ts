@@ -2,6 +2,7 @@ import { Sort } from 'deps'
 import { ValidatorContext } from '../middlewares/validator'
 import * as questionQueries from 'queries/questions'
 import { validationError } from 'utils/responseObject'
+import { DifficultyEnum, QuestionStatusEnum } from 'Types/enums'
 
 export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 	const { userId } = ctx.state.shared.user
@@ -76,8 +77,6 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 	}: GetAllQuestionsQueryParams = ctx.query
 
 	const filters: Record<string, any> = {}
-	const STATUS_VALUES = ['TODO', 'ATTEMPTED', 'SOLVED']
-	const DIFFICULTY_VALUES = ['EASY', 'MEDIUM', 'HARD']
 
 	const limitNum = parseInt(limit, 10)
 	if (isNaN(limitNum) || limitNum < 1 || limitNum > 500) {
@@ -119,7 +118,14 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 		const statusValues = status
 			.split(',')
 			.map((s) => s.trim().toUpperCase())
-		if (STATUS_VALUES.some((s) => !statusValues.includes(s))) {
+
+		const validStatuses = Object.values(QuestionStatusEnum)
+
+		const hasInvalidStatus = statusValues.some(
+			(s) => !validStatuses.includes(s as QuestionStatusEnum)
+		)
+
+		if (hasInvalidStatus) {
 			return validationError(
 				'Status must be one of TODO, ATTEMPTED, SOLVED',
 				'status'
@@ -137,7 +143,13 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 			.split(',')
 			.map((d) => d.trim().toUpperCase())
 
-		if (DIFFICULTY_VALUES.some((d) => !difficultyValues.includes(d))) {
+		const validDifficulties = Object.values(DifficultyEnum)
+
+		const hasInvalid = difficultyValues.some(
+			(d) => !validDifficulties.includes(d as DifficultyEnum)
+		)
+
+		if (hasInvalid) {
 			return validationError(
 				'Difficulty must be one of EASY, MEDIUM, HARD',
 				'difficulty'

@@ -9,7 +9,7 @@ import getDbQueryPromise, {
 	DatabaseSchemaQueryType,
 } from '../helpers/getDbQueryPromise'
 import * as bookmarkQueries from 'queries/bookmark'
-import { StatusEnum } from 'Types/status'
+import { QuestionStatusEnum } from 'Types/enums'
 
 export const getAllQuestions = async (ctx: Context) => {
 	const { filterObject, user } = ctx.state.shared
@@ -68,7 +68,7 @@ export const getSolution = async (ctx: Context) => {
 		{ userId, questionId: +questionId },
 		{
 			$setOnInsert: {
-				status: StatusEnum.TODO,
+				status: QuestionStatusEnum.TODO,
 				userId,
 				questionId: +questionId,
 			},

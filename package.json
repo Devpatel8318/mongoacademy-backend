@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit",
     "build": "rimraf dist && ./node_modules/.bin/babel src --out-dir dist --extensions \".ts\"",
     "prod": "yarn run build && NODE_ENV=production node dist/entry.js",
-    "sanitize": "yarn run type-check && yarn run format && yarn run lint",
+    "validate": "yarn run type-check && yarn run format && yarn run lint",
     "manual:deploy": "node src/scripts/manualDeploy.mjs",
     "docker:dev": "docker compose -f docker-compose.dev.yml -p mongoacademy up",
     "docker:dev-build": "docker compose -f docker-compose.dev.yml -p mongoacademy up --build",

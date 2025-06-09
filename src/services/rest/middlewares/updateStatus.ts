@@ -1,6 +1,6 @@
 import { Context, Next } from 'deps'
 import * as statusQueries from 'queries/status'
-import { StatusEnum } from 'Types/status'
+import { QuestionStatusEnum } from 'Types/enums'
 
 const updateStatus = async (ctx: Context, next: Next) => {
 	const { question, user } = ctx.state.shared
@@ -13,7 +13,7 @@ const updateStatus = async (ctx: Context, next: Next) => {
 			$setOnInsert: {
 				userId,
 				questionId: +questionId,
-				status: StatusEnum.ATTEMPTED,
+				status: QuestionStatusEnum.ATTEMPTED,
 			},
 		},
 		{ upsert: true }
