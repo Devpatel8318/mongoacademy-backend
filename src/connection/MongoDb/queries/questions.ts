@@ -42,7 +42,7 @@ export const fetchAllQuestions = async ({
 							{
 								$first: '$result.status',
 							},
-							1,
+							'TODO',
 						],
 					},
 				},
@@ -53,25 +53,6 @@ export const fetchAllQuestions = async ({
 			{
 				$project: {
 					...projection,
-					difficultyLabel: {
-						$switch: {
-							branches: [
-								{
-									case: { $eq: ['$difficulty', 1] },
-									then: 'Easy',
-								},
-								{
-									case: { $eq: ['$difficulty', 5] },
-									then: 'Medium',
-								},
-								{
-									case: { $eq: ['$difficulty', 10] },
-									then: 'Hard',
-								},
-							],
-							default: 'UNKNOWN',
-						},
-					},
 					status: {
 						$switch: {
 							branches: [
@@ -125,7 +106,7 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 						{
 							$first: '$result.status',
 						},
-						1,
+						'TODO',
 					],
 				},
 			},
@@ -162,34 +143,7 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 					{ $skip: skip },
 					{ $limit: limit },
 					{
-						$project: {
-							...projection,
-							difficultyLabel: {
-								$switch: {
-									branches: [
-										{
-											case: {
-												$eq: ['$difficulty', 1],
-											},
-											then: 'Easy',
-										},
-										{
-											case: {
-												$eq: ['$difficulty', 5],
-											},
-											then: 'Medium',
-										},
-										{
-											case: {
-												$eq: ['$difficulty', 10],
-											},
-											then: 'Hard',
-										},
-									],
-									default: 'UNKNOWN',
-								},
-							},
-						},
+						$project: projection,
 					},
 				],
 				totalCount: [{ $count: 'total' }],
@@ -232,7 +186,7 @@ export const fetchQuestionWithDifficultyLabelAndStatusTextAndBookmark = async (
 						{
 							$first: '$result.status',
 						},
-						1,
+						'TODO',
 					],
 				},
 			},
@@ -254,53 +208,7 @@ export const fetchQuestionWithDifficultyLabelAndStatusTextAndBookmark = async (
 			},
 		},
 		{
-			$project: {
-				...projection,
-				difficultyLabel: {
-					$switch: {
-						branches: [
-							{
-								case: {
-									$eq: ['$difficulty', 1],
-								},
-								then: 'Easy',
-							},
-							{
-								case: {
-									$eq: ['$difficulty', 5],
-								},
-								then: 'Medium',
-							},
-							{
-								case: {
-									$eq: ['$difficulty', 10],
-								},
-								then: 'Hard',
-							},
-						],
-						default: 'UNKNOWN',
-					},
-				},
-				status: {
-					$switch: {
-						branches: [
-							{
-								case: { $eq: ['$status', 1] },
-								then: 'TODO',
-							},
-							{
-								case: { $eq: ['$status', 2] },
-								then: 'ATTEMPTED',
-							},
-							{
-								case: { $eq: ['$status', 3] },
-								then: 'SOLVED',
-							},
-						],
-						default: 'TODO',
-					},
-				},
-			},
+			$project: projection,
 		},
 	]
 

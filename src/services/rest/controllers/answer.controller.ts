@@ -7,6 +7,7 @@ import pushMessageInSqs from 'utils/aws/SQS/pushMessageInSqs'
 import * as statusQueries from 'queries/status'
 import * as submissionQueries from 'queries/submission'
 import { SubmissionStatusEnum } from 'Types/submissionStatus'
+import { StatusEnum } from 'Types/status'
 
 export const submitAnswer = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
@@ -63,7 +64,7 @@ export const submitAnswer = async (ctx: Context) => {
 				{ userId, questionId },
 				{
 					$set: {
-						status: 3,
+						status: StatusEnum.SOLVED,
 					},
 				}
 			)
@@ -300,7 +301,7 @@ export const evaluateAnswer = async (ctx: Context) => {
 			{ userId, questionId },
 			{
 				$set: {
-					status: 3,
+					status: StatusEnum.SOLVED,
 				},
 			}
 		)

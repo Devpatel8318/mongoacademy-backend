@@ -1,1 +1,7 @@
-export type Status = 1 | 2 | 3 // TODO | ATTEMPTED | SOLVED
+export enum StatusEnum {
+	TODO = 'TODO',
+	ATTEMPTED = 'ATTEMPTED',
+	SOLVED = 'SOLVED',
+}
+
+export type Status = StatusEnum

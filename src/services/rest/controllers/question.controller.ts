@@ -1,5 +1,4 @@
-import { Status } from 'Types/global'
-import { Context, Sort } from 'deps'
+import { Context } from 'deps'
 import { successObject } from 'utils/responseObject'
 import * as questionQueries from 'queries/questions'
 import * as statusQueries from 'queries/status'
@@ -10,104 +9,33 @@ import getDbQueryPromise, {
 	DatabaseSchemaQueryType,
 } from '../helpers/getDbQueryPromise'
 import * as bookmarkQueries from 'queries/bookmark'
-
-interface GetAllQuestionsQueryParams {
-	limit?: string
-	page?: string
-	status?: string
-	difficulty?: string
-	sortBy?: string
-	sortOrder?: string
-	search?: string
-	onlyBookmarked?: string
-}
+import { StatusEnum } from 'Types/status'
 
 export const getAllQuestions = async (ctx: Context) => {
-	const { userId } = ctx.state.shared.user
-	const {
-		limit = '20',
-		page = '1',
-		status = '',
-		difficulty = '',
-		sortBy = '_id',
-		sortOrder = 'DESC',
-		search = '',
-		onlyBookmarked = 'false',
-	}: GetAllQuestionsQueryParams = ctx.query
+	const { filterObject, user } = ctx.state.shared
+	const { filter, sort, skip, limit, statusFilter, onlyBookmarked } =
+		filterObject
+	const { userId } = user
 
-	const limitNum = Number(limit)
-	const pageNum = Number(page)
-	const sortOrderNum = sortOrder === 'ASC' ? 1 : -1
-
-	const filters: Record<string, any> = {}
-	let statusFilter = {}
-
-	if (search) {
-		filters.question = { $regex: search, $options: 'i' }
-	}
-
-	if (status) {
-		statusFilter = {
-			status: {
-				$in: status.split(',').map((s) => {
-					switch (s.toUpperCase()) {
-						case 'TODO':
-							return 1
-						case 'ATTEMPTED':
-							return 2
-						case 'SOLVED':
-							return 3
-						default:
-							return 1
-					}
-				}),
-			},
-		}
-	}
-
-	if (difficulty) {
-		filters.difficulty = {
-			$in: difficulty.split(',').map((d) => {
-				if (!isNaN(Number(d))) return Number(d)
-				switch (d.toUpperCase()) {
-					case 'EASY':
-						return 1
-					case 'MEDIUM':
-						return 5
-					case 'HARD':
-						return 10
-					default:
-						return 1
-				}
-			}),
-		}
-	}
-
-	const sort: Sort = { [sortBy]: sortOrderNum }
-
-	const skip = (pageNum - 1) * limitNum
-
-	const onlyBookmarkedBool = onlyBookmarked === 'true'
-
-	const redisKey = `${userId}-filter=${JSON.stringify(filters)}:sort=${JSON.stringify(
+	const redisKey = `${userId}-filter=${JSON.stringify(filter)}:sort=${JSON.stringify(
 		sort
-	)}:page=${skip}-${limitNum}:onlyBookmarked=${onlyBookmarkedBool}`
+	)}:page=${skip}-${limit}`
 
 	const redisData =
 		// if user wanted bookmarked questions in that case, cached data might be old and incorrect
-		!onlyBookmarkedBool && (await getDataFromRedis(redisKey))
+		!onlyBookmarked && (await getDataFromRedis(redisKey))
 
-	let questionsData
+	let questionsData = redisData
 
 	if (redisData) {
 		questionsData = redisData
 	} else {
 		questionsData =
 			await questionQueries.fetchAllQuestionsAndCountWithDifficultyLabel({
-				filter: filters,
+				filter,
 				sort,
 				skip,
-				limit: limitNum,
+				limit,
 				projection: {
 					question: 1,
 					status: 1,
@@ -115,47 +43,19 @@ export const getAllQuestions = async (ctx: Context) => {
 					questionId: 1,
 				},
 				userId,
-				onlyBookmarked: onlyBookmarkedBool,
+				onlyBookmarked,
 				statusFilter,
 			})
 
 		await setDataInRedis(redisKey, questionsData, 60 * 60)
 	}
 
-	const { data, totalCount } = questionsData[0] || {}
+	const { data, totalCount } = questionsData[0]
 
 	const responseObject = {
-		total: totalCount?.[0]?.total || 0,
+		list: data,
+		total: totalCount?.[0]?.total,
 	}
-
-	const questionIds = data.map((item: any) => item.questionId)
-
-	const statuses = await statusQueries.fetchStatuses({
-		userId,
-		questionId: { $in: questionIds },
-	})
-
-	const STATUS_TEXTS = {
-		1: 'TODO',
-		2: 'ATTEMPTED',
-		3: 'SOLVED',
-	}
-
-	const statusMap = statuses.reduce((acc: Record<string, any>, item: any) => {
-		const { questionId, status } = item as {
-			questionId: number
-			status: Status
-		}
-		acc[questionId] = STATUS_TEXTS[status] || 'TODO'
-		return acc
-	}, {})
-
-	Object.assign(responseObject, {
-		list: data.map((item: any) => ({
-			...item,
-			status: statusMap[item.questionId] || 'TODO',
-		})),
-	})
 
 	ctx.body = successObject('', responseObject)
 }
@@ -168,7 +68,7 @@ export const getSolution = async (ctx: Context) => {
 		{ userId, questionId: +questionId },
 		{
 			$setOnInsert: {
-				status: 1,
+				status: StatusEnum.TODO,
 				userId,
 				questionId: +questionId,
 			},
