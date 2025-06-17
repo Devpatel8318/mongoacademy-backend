@@ -22,7 +22,8 @@
                     "deps": "./src/deps",
                     "queries": "./src/connection/MongoDb/queries",
                     "Types": "./src/Types",
-                    "MongoDbConnection": "./src/connection/MongoDb/connection",
+                    "MongoDbConnection": "./src/connection/MongoDb/primaryConnection",
+                    "MongoDbReadOnlyConnection": "./src/connection/MongoDb/readOnlyPublicConnection",
                     "redisQueries": "./src/connection/redis/queries"
                 }
             }

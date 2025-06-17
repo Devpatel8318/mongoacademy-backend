@@ -1,13 +1,9 @@
 import { Document, Filter, UpdateFilter, UpdateOptions } from 'mongodb'
-import MongoDB from 'MongoDbConnection'
+import MongoDB from 'src/connection/MongoDb/primaryConnection'
 
-const collectionName = 'status'
+const collectionName = 'questionProgress'
 
-export const fetchStatuses = async (filter: Filter<Document>) => {
-	return await MongoDB.collection(collectionName).find(filter).toArray()
-}
-
-export const updateOneStatus = async (
+export const updateOneQuestionProgress = async (
 	filter: Filter<Document>,
 	newDoc: Document[] | UpdateFilter<Document>,
 	options?: UpdateOptions

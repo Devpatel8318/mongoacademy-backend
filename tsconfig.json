@@ -41,7 +41,10 @@
 				"src/connection/MongoDb/queries/*"
 			],
 			"MongoDbConnection": [
-				"src/connection/MongoDb/connection"
+				"src/connection/MongoDb/primaryConnection"
+			],
+			"MongoDbReadOnlyConnection": [
+				"src/connection/MongoDb/readOnlyPublicConnection"
 			],
 			"Types/*": [
 				"src/Types/*"

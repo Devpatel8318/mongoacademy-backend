@@ -35,10 +35,10 @@ export const signup = async (ctx: Context) => {
 }
 
 export const loginUser = async (ctx: Context) => {
-	const { email, userId } = ctx.state.shared.user
+	const { email, userId, profilePictureUrl } = ctx.state.shared.user
 
 	const [, error] = tryCatchSync(() => {
-		setAuthCookies(ctx, { email, userId })
+		setAuthCookies(ctx, { email, userId, profilePictureUrl })
 	})
 
 	if (error) {
@@ -71,7 +71,10 @@ export const oauthGoogle = async (ctx: Context) => {
 	} else {
 		// Signup
 		const userId = await createUser(email, { googleId, profilePictureUrl })
-		Object.assign(tokenContent, { userId })
+		Object.assign(tokenContent, {
+			userId,
+			...(profilePictureUrl && { profilePictureUrl }),
+		})
 
 		successMessage = 'Signup Successful.'
 		errorMessage = 'Signup Failed.'

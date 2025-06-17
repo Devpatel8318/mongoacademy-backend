@@ -10,7 +10,7 @@ import {
 import auth from '../middlewares/auth'
 import validator from '../middlewares/validator'
 import {
-	isQuestionIdValid,
+	doesQuestionExist,
 	isQuestionListQueryParamsValid,
 } from '../validators/questionValidators'
 
@@ -27,21 +27,21 @@ router.get(
 router.get(
 	'/view/:questionId',
 	auth,
-	validator([isQuestionIdValid]),
+	validator([doesQuestionExist]),
 	viewQuestion
 )
 
 router.post(
 	'/bookmark/:questionId',
 	auth,
-	validator([isQuestionIdValid]),
+	validator([doesQuestionExist]),
 	bookmarkQuestion
 )
 
 router.get(
 	'/solution/:questionId',
 	auth,
-	validator([isQuestionIdValid]),
+	validator([doesQuestionExist]),
 	getSolution
 )
 

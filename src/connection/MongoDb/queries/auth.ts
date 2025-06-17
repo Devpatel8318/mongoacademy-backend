@@ -1,13 +1,13 @@
-import mongoDB from 'MongoDbConnection'
+import mongoDB from 'src/connection/MongoDb/primaryConnection'
 const collectionName = 'auth'
 
 export interface User {
 	userId: number
 	email: string
-	createdAt: number // epoch time
 	password?: string
 	googleId?: string
 	profilePictureUrl?: string
+	createdAt: Date
 }
 
 export const fetchOneUserByEmail = async (email: string) => {

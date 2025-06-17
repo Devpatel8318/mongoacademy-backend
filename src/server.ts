@@ -2,6 +2,8 @@
 //TODO: currently it is compulsory to write {} in find({}), in short mandatory to put empty object, fix that
 //TODO: try to remove credentials from aws, as it might take it from env automatically
 //TODO: remove .nodemon and put that code in package.json dev script
+// TODO: check why toArray() is not necessary in simple match aggregate step
+// TODO: normalize question and answer to JSON which have fields wrapped in quotes. (JSON.stringify is useful)
 import http from 'http'
 import app from './app'
 import config from 'config'

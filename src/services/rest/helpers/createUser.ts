@@ -7,7 +7,7 @@ const createUser = async (email: string, data: Object) => {
 	const userDoc = {
 		userId,
 		email,
-		createdAt: Date.now(),
+		createdAt: new Date(),
 		...data,
 	}
 

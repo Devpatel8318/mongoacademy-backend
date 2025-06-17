@@ -1,12 +1,4 @@
-import { Collection } from 'mongodb'
-import MongoDB from 'MongoDbConnection'
-
-const methodsReturningCursor = [
-	'find',
-	'aggregate',
-	'listIndexes',
-	'listCollections',
-]
+import { Collection, Db } from 'mongodb'
 
 export interface DatabaseSchemaQueryType {
 	collection: string
@@ -14,18 +6,10 @@ export interface DatabaseSchemaQueryType {
 	queryFilter: string
 }
 
-const getDbQueryPromise = (query: DatabaseSchemaQueryType) => {
+const getDbQueryPromise = (MongoDB: Db, query: DatabaseSchemaQueryType) => {
 	const { collection, queryType, queryFilter } = query
 
 	const mongoQuestionCollection = MongoDB.collection(collection)
-
-	if (methodsReturningCursor.includes(queryType)) {
-		if (queryType in mongoQuestionCollection) {
-			return (mongoQuestionCollection[queryType] as Function)(
-				queryFilter
-			).toArray()
-		}
-	}
 
 	if (queryType in mongoQuestionCollection) {
 		return (mongoQuestionCollection[queryType] as Function)(queryFilter)

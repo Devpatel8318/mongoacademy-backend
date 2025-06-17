@@ -4,19 +4,21 @@ import { successObject } from 'utils/responseObject'
 import getMd5Hash from 'utils/getMd5Hash'
 import { getDataFromRedis } from 'redisQueries'
 import pushMessageInSqs from 'utils/aws/SQS/pushMessageInSqs'
-import * as statusQueries from 'queries/status'
+import * as questionQueries from 'queries/questionProgress'
 import * as submissionQueries from 'queries/submission'
-import { QuestionStatusEnum, SubmissionStatusEnum } from 'Types/enums'
+import { QuestionProgressEnum, SubmissionStatusEnum } from 'Types/enums'
 
 export const submitAnswer = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
 	const {
 		questionId,
-		answer: correctQuery,
-		collection: correctCollection,
-		queryType: correctQueryType,
-		queryFilter: correctQueryFilter,
-		chainedOps: correctChainedOps,
+		correctQuery,
+		correctCollection,
+		correctQueryType,
+		correctQueryFilter,
+		correctChainedOps,
+		correctQueryUpdate,
+		correctQueryOptions,
 	} = ctx.state.shared.question
 
 	const answer = ctx.state.shared.answer
@@ -26,10 +28,14 @@ export const submitAnswer = async (ctx: Context) => {
 		collection,
 		queryType,
 		queryFilter,
+		queryUpdate,
+		queryOptions,
 		chainedOps,
 		socketId,
 		submissionId,
 	} = answer
+
+	console.log('queryFilter', queryFilter)
 
 	const Q_HASH = getMd5Hash(correctQuery)
 	const A_HASH = getMd5Hash(answerQuery)
@@ -59,11 +65,12 @@ export const submitAnswer = async (ctx: Context) => {
 
 	if (cachedAnswerResponse && cachedQuestionResponse) {
 		if (isEqual(cachedQuestionResponse, cachedAnswerResponse)) {
-			await statusQueries.updateOneStatus(
+			await questionQueries.updateOneQuestionProgress(
 				{ userId, questionId },
 				{
 					$set: {
-						status: QuestionStatusEnum.SOLVED,
+						progress: QuestionProgressEnum.SOLVED,
+						updatedAt: new Date(),
 					},
 				}
 			)
@@ -72,7 +79,8 @@ export const submitAnswer = async (ctx: Context) => {
 				{ submissionId },
 				{
 					$set: {
-						status: SubmissionStatusEnum.CORRECT,
+						submissionStatus: SubmissionStatusEnum.CORRECT,
+						updatedAt: new Date(),
 					},
 				}
 			)
@@ -88,7 +96,8 @@ export const submitAnswer = async (ctx: Context) => {
 				{ submissionId },
 				{
 					$set: {
-						status: SubmissionStatusEnum.INCORRECT,
+						submissionStatus: SubmissionStatusEnum.INCORRECT,
+						updatedAt: new Date(),
 					},
 				}
 			)
@@ -119,6 +128,8 @@ export const submitAnswer = async (ctx: Context) => {
 					collection,
 					queryType,
 					queryFilter,
+					queryUpdate,
+					queryOptions,
 					answerQuery: answerQuery,
 					chainedOps,
 				},
@@ -135,6 +146,8 @@ export const submitAnswer = async (ctx: Context) => {
 					collection: correctCollection,
 					queryType: correctQueryType,
 					queryFilter: correctQueryFilter,
+					queryUpdate: correctQueryUpdate,
+					queryOptions: correctQueryOptions,
 					questionQuery: correctQuery,
 					chainedOps: correctChainedOps,
 				},
@@ -155,6 +168,8 @@ export const submitAnswer = async (ctx: Context) => {
 					collection: correctCollection,
 					queryType: correctQueryType,
 					queryFilter: correctQueryFilter,
+					queryUpdate: correctQueryUpdate,
+					queryOptions: correctQueryOptions,
 					questionQuery: correctQuery,
 					chainedOps: correctChainedOps,
 				},
@@ -167,6 +182,8 @@ export const submitAnswer = async (ctx: Context) => {
 					collection,
 					queryType,
 					queryFilter,
+					queryUpdate,
+					queryOptions,
 					answerQuery: answerQuery,
 					chainedOps,
 				},
@@ -195,10 +212,19 @@ export const runAnswer = async (ctx: Context) => {
 		collection,
 		queryType,
 		queryFilter,
+		queryUpdate,
+		queryOptions,
 		chainedOps,
 		socketId,
 		submissionId,
 	} = answer
+
+	console.log({
+		queryType,
+		queryFilter,
+		queryUpdate,
+		queryOptions,
+	})
 
 	const A_HASH = getMd5Hash(answerQuery)
 
@@ -220,7 +246,7 @@ export const runAnswer = async (ctx: Context) => {
 			DataType: 'String',
 			StringValue: email,
 		},
-		senderId: { DataType: 'Number', StringValue: userId },
+		senderId: { DataType: 'Number', StringValue: `${userId}` },
 		isRunOnly: {
 			DataType: 'String',
 			StringValue: 'true',
@@ -246,6 +272,8 @@ export const runAnswer = async (ctx: Context) => {
 				collection,
 				queryType,
 				queryFilter,
+				queryUpdate,
+				queryOptions,
 				answerQuery: answerQuery,
 				chainedOps,
 			},
@@ -295,12 +323,18 @@ export const evaluateAnswer = async (ctx: Context) => {
 		ctx.throw('Something went wrong')
 	}
 
+	console.log({
+		a: response.answer,
+		b: response.question,
+	})
+
 	if (isEqual(response.question, response.answer)) {
-		await statusQueries.updateOneStatus(
+		await questionQueries.updateOneQuestionProgress(
 			{ userId, questionId },
 			{
 				$set: {
-					status: QuestionStatusEnum.SOLVED,
+					progress: QuestionProgressEnum.SOLVED,
+					updatedAt: new Date(),
 				},
 			}
 		)
@@ -309,7 +343,8 @@ export const evaluateAnswer = async (ctx: Context) => {
 			{ submissionId },
 			{
 				$set: {
-					status: SubmissionStatusEnum.CORRECT,
+					submissionStatus: SubmissionStatusEnum.CORRECT,
+					updatedAt: new Date(),
 				},
 			}
 		)
@@ -325,7 +360,8 @@ export const evaluateAnswer = async (ctx: Context) => {
 			{ submissionId },
 			{
 				$set: {
-					status: SubmissionStatusEnum.INCORRECT,
+					submissionStatus: SubmissionStatusEnum.INCORRECT,
+					updatedAt: new Date(),
 				},
 			}
 		)
@@ -372,13 +408,14 @@ export const runOnlyRetrieveData = async (ctx: Context) => {
 
 	const answerResponse = await getDataFromRedis(answerRedisKey)
 
-	if (answerResponse) {
+	if (answerResponse !== undefined) {
 		ctx.body = successObject('', {
 			questionId,
 			output: answerResponse,
 			isRunOnly: true,
 		})
 	} else {
+		console.log('answerResponse not found in redis')
 		ctx.throw('something went wrong')
 	}
 }

@@ -1,4 +1,4 @@
-import mongoDB from 'MongoDbConnection'
+import mongoDB from 'src/connection/MongoDb/primaryConnection'
 const collectionName = 'sequenceManage'
 
 export const getId = async (field: string): Promise<number> => {

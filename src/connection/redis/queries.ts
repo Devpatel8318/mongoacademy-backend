@@ -7,7 +7,7 @@ export const setDataInRedis = async (
 	value: string | object,
 	expireIn?: number
 ): Promise<string | null> => {
-	if (config.redis.doNotCache) {
+	if (config.redis.doNotCache === 'true') {
 		return key
 	}
 

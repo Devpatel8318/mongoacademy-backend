@@ -29,9 +29,9 @@ export const isRefreshTokenValid = async (ctx: Context) => {
 		ctx.throw(401, 'Invalid User')
 	}
 
-	const { email, profilePictureUrl } = user
+	const { email, profilePictureUrl, userId } = user
 
-	ctx.state.shared = { user: { email, profilePictureUrl } }
+	ctx.state.shared = { user: { email, profilePictureUrl, userId } }
 
 	return null
 }
@@ -78,9 +78,11 @@ export const doesUserExist = async (ctx: Context) => {
 		return validationError('User does not exist', 'email')
 	}
 
-	const { password, userId, googleId } = user
+	const { password, userId, googleId, profilePictureUrl } = user
 
-	ctx.state.shared = { user: { password, email, userId, googleId } }
+	ctx.state.shared = {
+		user: { password, email, userId, googleId, profilePictureUrl },
+	}
 
 	return null
 }

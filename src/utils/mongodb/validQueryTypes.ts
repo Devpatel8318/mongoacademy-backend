@@ -58,7 +58,12 @@ const methodsOnDbCollection = {
 		'validate',
 		'watch',
 	],
-	currentlySupportedQueryTypes: ['find', 'findOne', 'aggregate'],
+	// currentlySupportedQueryTypes: [
+	// 	'find',
+	// 	'findOne',
+	// 	'aggregate',
+	// 	'countDocuments',
+	// ],
 	allChainedOperations: [
 		// Cursor methods
 		'sort', // Sorts the results

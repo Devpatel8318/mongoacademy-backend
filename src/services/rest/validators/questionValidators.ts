@@ -2,9 +2,9 @@ import { Sort } from 'deps'
 import { ValidatorContext } from '../middlewares/validator'
 import * as questionQueries from 'queries/questions'
 import { validationError } from 'utils/responseObject'
-import { DifficultyEnum, QuestionStatusEnum } from 'Types/enums'
+import { DifficultyEnum, QuestionProgressEnum } from 'Types/enums'
 
-export const isQuestionIdValid = async (ctx: ValidatorContext) => {
+export const doesQuestionExist = async (ctx: ValidatorContext) => {
 	const { userId } = ctx.state.shared.user
 
 	if (!Object.prototype.hasOwnProperty.call(ctx, 'params')) {
@@ -20,7 +20,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 	}
 
 	const questionData =
-		await questionQueries.fetchQuestionWithDifficultyLabelAndStatusTextAndBookmark(
+		await questionQueries.fetchQuestionWithDifficultyLabelAndProgressTextAndBookmark(
 			{ questionId: +questionId },
 			userId,
 			{
@@ -29,9 +29,8 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 				description: 1,
 				questionId: 1,
 				difficulty: 1,
-				status: 1,
+				progress: 1,
 				answer: 1,
-				validCollections: 1,
 				collection: 1,
 				queryType: 1,
 				queryFilter: 1,
@@ -56,7 +55,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 interface GetAllQuestionsQueryParams {
 	limit?: string
 	page?: string
-	status?: string
+	progress?: string
 	difficulty?: string
 	sortBy?: string
 	sortOrder?: string
@@ -68,7 +67,7 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 	const {
 		limit = '20',
 		page = '1',
-		status = '',
+		progress = '',
 		difficulty = '',
 		sortBy = '_id',
 		sortOrder = 'DESC',
@@ -113,27 +112,27 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 		filters.question = { $regex: trimmedSearch, $options: 'i' }
 	}
 
-	let statusFilter = {}
-	if (status) {
-		const statusValues = status
+	let progressFilter = {}
+	if (progress) {
+		const progressValues = progress
 			.split(',')
 			.map((s) => s.trim().toUpperCase())
 
-		const validStatuses = Object.values(QuestionStatusEnum)
+		const validProgress = Object.values(QuestionProgressEnum)
 
-		const hasInvalidStatus = statusValues.some(
-			(s) => !validStatuses.includes(s as QuestionStatusEnum)
+		const hasInvalidProgress = progressValues.some(
+			(s) => !validProgress.includes(s as QuestionProgressEnum)
 		)
 
-		if (hasInvalidStatus) {
+		if (hasInvalidProgress) {
 			return validationError(
-				'Status must be one of TODO, ATTEMPTED, SOLVED',
-				'status'
+				'Progress must be one of TODO, ATTEMPTED, SOLVED',
+				'progress'
 			)
 		}
-		statusFilter = {
-			status: {
-				$in: statusValues,
+		progressFilter = {
+			progress: {
+				$in: progressValues,
 			},
 		}
 	}
@@ -174,7 +173,7 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 		sort,
 		skip,
 		limit: limitNum,
-		statusFilter,
+		progressFilter,
 		onlyBookmarked: onlyBookmarkedBool,
 	}
 

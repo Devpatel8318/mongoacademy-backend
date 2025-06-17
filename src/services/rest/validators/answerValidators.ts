@@ -4,8 +4,11 @@ import * as questionQueries from 'queries/questions'
 import { validationError } from 'utils/responseObject'
 import methodsOnDbCollection from 'utils/mongodb/validQueryTypes'
 import { tryCatchSync } from 'utils/tryCatch'
+import extractPartsFromQuery, {
+	ChainedOperation,
+} from '../helpers/extractPartsFromQuery'
 
-export const isQuestionIdValid = async (ctx: ValidatorContext) => {
+export const doesQuestionExist = async (ctx: ValidatorContext) => {
 	if (!Object.prototype.hasOwnProperty.call(ctx, 'params')) {
 		ctx.state.continueCheckingOtherValidators = false
 		return validationError('Please provide Question Id', 'questionId')
@@ -27,9 +30,7 @@ export const isQuestionIdValid = async (ctx: ValidatorContext) => {
 		return validationError('No question found with this id', 'questionId')
 	}
 
-	ctx.state.shared.question = {
-		...questionData,
-	}
+	ctx.state.shared.question = questionData
 
 	return null
 }
@@ -68,92 +69,23 @@ export const doesAnswerQueryExist = (ctx: Context) => {
 	return null
 }
 
-// Extract the main query parameters by finding matching parentheses
-const extractBetweenMatchingParentheses = (str: string, startPos: number) => {
-	let openCount = 0
-	let closeCount = 0
-	let startFound = false
-	let start = -1
-
-	for (let i = startPos; i < str.length; i++) {
-		if (str[i] === '(') {
-			if (!startFound) {
-				start = i + 1
-				startFound = true
-			}
-			openCount++
-		} else if (str[i] === ')') {
-			closeCount++
-			if (startFound && openCount === closeCount) {
-				return str.substring(start, i)
-			}
-		}
-	}
-	return ''
-}
-
-interface ChainedOperation {
-	operation: string
-	params: string | number | Record<string, any>
-}
-
-export const isNumberOfDotsValid = (ctx: Context) => {
+export const isQueryPartsValid = (ctx: Context) => {
 	const sharedAnswer = ctx.state.shared.answer
 	const { answerQuery } = sharedAnswer as { answerQuery: string }
 
-	const dbCollectionRegex = /db\.(\w+)\.(\w+)\(/
-	const dbCollectionMatch = answerQuery.match(dbCollectionRegex)
+	const {
+		errorMessage,
+		collection,
+		queryType,
+		queryFilter,
+		queryUpdate,
+		queryOptions,
+		chainedOps,
+	} = extractPartsFromQuery(answerQuery)
 
-	if (!dbCollectionMatch) {
+	if (errorMessage) {
 		ctx.state.continueCheckingOtherValidators = false
-		return validationError('Invalid MongoDB query string format')
-	}
-
-	const [, collection, queryType] = dbCollectionMatch
-
-	// Find the position of the query type function
-	const queryTypePos = answerQuery.indexOf(`${queryType}(`)
-	const queryFilter = extractBetweenMatchingParentheses(
-		answerQuery,
-		queryTypePos
-	)
-
-	// Extract chained operations
-	const chainedOps = [] as ChainedOperation[]
-	let remainingQuery = answerQuery
-	let dotOpIndex = remainingQuery.indexOf('.')
-
-	// Skip the first operation (the main query)
-	if (dotOpIndex !== -1) {
-		dotOpIndex = remainingQuery.indexOf('.', dotOpIndex + 1)
-	}
-
-	while (dotOpIndex !== -1) {
-		// Extract the operation name
-		const opStartIndex = dotOpIndex + 1
-		const opEndIndex = remainingQuery.indexOf('(', opStartIndex)
-		if (opEndIndex === -1) break
-
-		const operation = remainingQuery.substring(opStartIndex, opEndIndex)
-
-		// Extract the operation parameters
-		const params = extractBetweenMatchingParentheses(
-			remainingQuery,
-			opEndIndex
-		)
-
-		if (operation !== queryType) {
-			chainedOps.push({
-				operation,
-				params: params.trim(),
-			})
-		}
-
-		// Move past this operation to find the next one
-		const closeParenIndex = remainingQuery.indexOf(')', opEndIndex)
-		if (closeParenIndex === -1) break
-
-		dotOpIndex = remainingQuery.indexOf('.', closeParenIndex)
+		return validationError(errorMessage, 'answerQuery')
 	}
 
 	ctx.state.shared.answer = {
@@ -161,6 +93,8 @@ export const isNumberOfDotsValid = (ctx: Context) => {
 		collection,
 		queryType,
 		queryFilter,
+		queryUpdate,
+		queryOptions,
 		chainedOps,
 	}
 
@@ -169,7 +103,6 @@ export const isNumberOfDotsValid = (ctx: Context) => {
 
 export const isCollectionValid = (ctx: Context) => {
 	const { collection } = ctx.state.shared.answer
-	const { validCollections } = ctx.state.shared.question
 
 	if (!collection || !collection.trim()) {
 		return validationError('Please Provide Collection Name', 'collection')
@@ -180,25 +113,22 @@ export const isCollectionValid = (ctx: Context) => {
 		return validationError('Invalid Collection Name Format', 'collection')
 	}
 
-	if (!validCollections.includes(collection)) {
-		return validationError('Invalid Collection Name', 'collection')
-	}
-
 	return null
 }
 
+// TODO: add validation for queryType, in a way that it stats with is "not supported"
 export const isQueryTypeValid = (ctx: Context) => {
 	const { queryType } = ctx.state.shared.answer
 	// const { validQueryTypes } = ctx.state.shared.question
-	const { currentlySupportedQueryTypes } = methodsOnDbCollection
+	// const { currentlySupportedQueryTypes } = methodsOnDbCollection
 
 	if (!queryType || !queryType.trim()) {
 		return validationError('Invalid Query Type', 'queryType')
 	}
 
-	if (!currentlySupportedQueryTypes.includes(queryType)) {
-		return validationError('Invalid Query Type', 'queryType')
-	}
+	// if (!currentlySupportedQueryTypes.includes(queryType)) {
+	// 	return validationError('Invalid Query Type', 'queryType')
+	// }
 
 	// if (!validQueryTypes.includes(queryType)) {
 	// 	return validationError(
@@ -213,13 +143,55 @@ export const isQueryTypeValid = (ctx: Context) => {
 export const isQueryFilterValid = (ctx: Context) => {
 	const { queryFilter } = ctx.state.shared.answer
 
-	const isFilterValidResponse = isFilterValid(queryFilter)
+	console.log('queryFilter', queryFilter, typeof queryFilter)
 
+	const isFilterValidResponse = isFilterValid(queryFilter)
+	console.log(
+		'isFilterValidResponse',
+		isFilterValidResponse,
+		typeof isFilterValidResponse
+	)
 	if (!isFilterValidResponse) {
 		return validationError('Invalid Query Filter', 'queryFilter')
 	}
 
 	ctx.state.shared.answer.queryFilter = isFilterValidResponse
+
+	return null
+}
+
+export const isQueryUpdateValid = (ctx: Context) => {
+	const { queryUpdate } = ctx.state.shared.answer
+
+	if (queryUpdate === null || queryUpdate === undefined) {
+		return null
+	}
+
+	const isUpdateValidResponse = isFilterValid(queryUpdate)
+
+	if (!isUpdateValidResponse) {
+		return validationError('Invalid Query Update', 'queryUpdate')
+	}
+
+	ctx.state.shared.answer.queryUpdate = isUpdateValidResponse
+
+	return null
+}
+
+export const isQueryOptionsValid = (ctx: Context) => {
+	const { queryOptions } = ctx.state.shared.answer
+
+	if (queryOptions === null || queryOptions === undefined) {
+		return null
+	}
+
+	const isOptionsValidResponse = isFilterValid(queryOptions)
+
+	if (!isOptionsValidResponse) {
+		return validationError('Invalid Query Options', 'queryOptions')
+	}
+
+	ctx.state.shared.answer.queryOptions = isOptionsValidResponse
 
 	return null
 }
@@ -248,9 +220,6 @@ export const isChainedOpsValid = (ctx: Context) => {
 			)
 		}
 
-		console.log({
-			op,
-		})
 		// Check if operation is in whitelist
 		if (!validChainedOperations.includes(op.operation)) {
 			return validationError(

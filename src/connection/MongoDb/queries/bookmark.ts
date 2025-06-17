@@ -1,4 +1,4 @@
-import MongoDB from 'MongoDbConnection'
+import MongoDB from 'src/connection/MongoDb/primaryConnection'
 
 const collectionName = 'bookmark'
 
@@ -13,6 +13,7 @@ export const insertOneBookmark = async (userId: number, questionId: number) => {
 	return await MongoDB.collection(collectionName).insertOne({
 		userId,
 		questionId,
+		createdAt: new Date(),
 	})
 }
 

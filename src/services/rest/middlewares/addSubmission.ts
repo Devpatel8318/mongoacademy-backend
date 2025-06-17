@@ -16,8 +16,9 @@ const addSubmission = async (ctx: Context, next: Next) => {
 		userId,
 		questionId,
 		query: answerQuery,
-		createdAt: Date.now(),
-		status: SubmissionStatusEnum.PENDING,
+		submissionStatus: SubmissionStatusEnum.PENDING,
+		createdAt: new Date(),
+		updatedAt: new Date(),
 	})
 
 	ctx.state.shared.answer = {

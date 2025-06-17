@@ -1,8 +1,6 @@
 import config from 'config'
 import { Context, Next } from 'deps'
 
-import * as authQueries from 'queries/auth'
-
 import { isTokenValid } from '../helpers/jwtFunctions'
 
 const auth = async (ctx: Context, next: Next) => {
@@ -10,22 +8,24 @@ const auth = async (ctx: Context, next: Next) => {
 	const cookie = ctx.cookies.get(accessTokenName)
 
 	if (!cookie) {
-		ctx.throw(401, 'Invalid Use1')
+		ctx.throw(401, 'Invalid User 1')
 	}
 
 	const decodedToken = isTokenValid(cookie)
 
-	if (!decodedToken || typeof decodedToken.email !== 'string') {
-		ctx.throw(401, 'Invalid User2')
+	if (!decodedToken) {
+		ctx.throw(401, 'Invalid User 2')
 	}
 
-	const user = await authQueries.fetchOneUserByEmail(decodedToken.email)
-
-	if (!user) {
-		ctx.throw(401, 'Invalid User3')
+	if (!decodedToken.email || typeof decodedToken.email !== 'string') {
+		ctx.throw(401, 'Invalid User 4')
 	}
 
-	const { email, userId } = user
+	if (!decodedToken.userId || typeof decodedToken.userId !== 'number') {
+		ctx.throw(401, 'Invalid User 5')
+	}
+
+	const { email, userId } = decodedToken
 
 	ctx.state.shared = { user: { email, userId } }
 

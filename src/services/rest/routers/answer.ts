@@ -12,34 +12,40 @@ import validator from '../middlewares/validator'
 import {
 	isAnswerFieldsValid,
 	doesAnswerQueryExist,
-	isNumberOfDotsValid,
+	isQueryPartsValid,
 	isCollectionValid,
 	isQueryTypeValid,
 	isQueryFilterValid,
 	isChainedOpsValid,
 	isSocketIdValid,
 	isSubmissionIdValid,
+	isQueryUpdateValid,
+	isQueryOptionsValid,
 } from '../validators/answerValidators'
 
-import { isQuestionIdValid } from '../validators/answerValidators'
-import updateStatus from '../middlewares/updateStatus'
+import { doesQuestionExist } from '../validators/answerValidators'
+import updateQuestionProgress from '../middlewares/updateQuestionProgress'
 import auth from '../middlewares/auth'
 import addSubmission from '../middlewares/addSubmission'
+import extractQueryPartsFromQuestion from '../middlewares/extractQueryPartsFromQuestion'
 
 const router = new Router({ prefix: '/answer' })
 
 router.post(
 	'/submit/:questionId',
 	auth,
-	validator([isQuestionIdValid]),
-	updateStatus,
+	validator([doesQuestionExist]),
+	extractQueryPartsFromQuestion,
+	updateQuestionProgress,
 	validator([
 		isAnswerFieldsValid,
 		doesAnswerQueryExist,
-		isNumberOfDotsValid,
+		isQueryPartsValid,
 		isCollectionValid,
 		isQueryTypeValid,
 		isQueryFilterValid,
+		isQueryUpdateValid,
+		isQueryOptionsValid,
 		isChainedOpsValid,
 		isSocketIdValid,
 	]),
@@ -50,15 +56,17 @@ router.post(
 router.post(
 	'/run/:questionId',
 	auth,
-	validator([isQuestionIdValid]),
-	updateStatus,
+	validator([doesQuestionExist]),
+	updateQuestionProgress,
 	validator([
 		isAnswerFieldsValid,
 		doesAnswerQueryExist,
-		isNumberOfDotsValid,
+		isQueryPartsValid,
 		isCollectionValid,
 		isQueryTypeValid,
 		isQueryFilterValid,
+		isQueryUpdateValid,
+		isQueryOptionsValid,
 		isChainedOpsValid,
 		isSocketIdValid,
 	]),
@@ -68,21 +76,21 @@ router.post(
 router.post(
 	'/evaluate/:questionId',
 	auth,
-	validator([isQuestionIdValid, isSubmissionIdValid]),
+	validator([doesQuestionExist, isSubmissionIdValid]),
 	evaluateAnswer
 )
 
 router.post(
 	'/runonly/retrieve/:questionId',
 	auth,
-	validator([isQuestionIdValid]),
+	validator([doesQuestionExist]),
 	runOnlyRetrieveData
 )
 
 router.get(
 	'/submissions/:questionId',
 	auth,
-	validator([isQuestionIdValid]),
+	validator([doesQuestionExist]),
 	submissionList
 )
 

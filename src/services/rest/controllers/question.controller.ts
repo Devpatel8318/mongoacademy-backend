@@ -1,7 +1,7 @@
 import { Context } from 'deps'
 import { successObject } from 'utils/responseObject'
 import * as questionQueries from 'queries/questions'
-import * as statusQueries from 'queries/status'
+import * as questionProgressQueries from 'queries/questionProgress'
 import { getDataFromRedis, setDataInRedis } from 'redisQueries'
 import concurrently from 'utils/concurrently'
 import getMd5Hash from 'utils/getMd5Hash'
@@ -9,48 +9,34 @@ import getDbQueryPromise, {
 	DatabaseSchemaQueryType,
 } from '../helpers/getDbQueryPromise'
 import * as bookmarkQueries from 'queries/bookmark'
-import { QuestionStatusEnum } from 'Types/enums'
+import { QuestionProgressEnum } from 'Types/enums'
+import MongoDbReadOnlyConnection from 'MongoDbReadOnlyConnection'
 
 export const getAllQuestions = async (ctx: Context) => {
 	const { filterObject, user } = ctx.state.shared
-	const { filter, sort, skip, limit, statusFilter, onlyBookmarked } =
+	const { filter, sort, skip, limit, progressFilter, onlyBookmarked } =
 		filterObject
 	const { userId } = user
 
-	const redisKey = `${userId}-filter=${JSON.stringify(filter)}:sort=${JSON.stringify(
-		sort
-	)}:page=${skip}-${limit}`
+	const questionsData =
+		await questionQueries.fetchAllQuestionsAndCountWithDifficultyLabel({
+			filter,
+			sort,
+			skip,
+			limit,
+			projection: {
+				question: 1,
+				progress: 1,
+				difficulty: 1,
+				questionId: 1,
+			},
+			userId,
+			onlyBookmarked,
+			progressFilter,
+		})
 
-	const redisData =
-		// if user wanted bookmarked questions in that case, cached data might be old and incorrect
-		!onlyBookmarked && (await getDataFromRedis(redisKey))
-
-	let questionsData = redisData
-
-	if (redisData) {
-		questionsData = redisData
-	} else {
-		questionsData =
-			await questionQueries.fetchAllQuestionsAndCountWithDifficultyLabel({
-				filter,
-				sort,
-				skip,
-				limit,
-				projection: {
-					question: 1,
-					status: 1,
-					difficulty: 1,
-					questionId: 1,
-				},
-				userId,
-				onlyBookmarked,
-				statusFilter,
-			})
-
-		await setDataInRedis(redisKey, questionsData, 60 * 60)
-	}
-
-	const { data, totalCount } = questionsData[0]
+	const firstResult = questionsData[0] || { data: [], totalCount: [] }
+	const { data, totalCount } = firstResult
 
 	const responseObject = {
 		list: data,
@@ -64,17 +50,20 @@ export const getSolution = async (ctx: Context) => {
 	const { questionId, answer } = ctx.state.shared.question
 	const { userId } = ctx.state.shared.user
 
-	await statusQueries.updateOneStatus(
+	await questionProgressQueries.updateOneQuestionProgress(
 		{ userId, questionId: +questionId },
 		{
 			$setOnInsert: {
-				status: QuestionStatusEnum.TODO,
+				progress: QuestionProgressEnum.TODO,
 				userId,
 				questionId: +questionId,
+				createdAt: new Date(),
+				updatedAt: new Date(),
 			},
 			$set: {
 				isSolutionSeen: true,
-				solutionSeenAt: Date.now(),
+				solutionSeenAt: new Date(),
+				updatedAt: new Date(),
 			},
 		},
 		{ upsert: true }
@@ -113,7 +102,11 @@ export const viewQuestion = async (ctx: Context) => {
 			if (cachedSchema) {
 				schemaResult = cachedSchema
 			} else {
-				const dbExecutionPromise = getDbQueryPromise(query)
+				console.log({ query })
+				const dbExecutionPromise = getDbQueryPromise(
+					MongoDbReadOnlyConnection,
+					query
+				)
 				const fetchedSchema = await dbExecutionPromise
 
 				await setDataInRedis(

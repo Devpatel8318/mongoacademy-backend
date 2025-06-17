@@ -1,5 +1,5 @@
 import { Sort } from 'deps'
-import mongoDB from 'MongoDbConnection'
+import mongoDB from 'src/connection/MongoDb/primaryConnection'
 
 const collectionName = 'questions'
 
@@ -11,7 +11,7 @@ type getAllQuestionsParams = {
 	sort?: Sort
 	userId: number
 	onlyBookmarked?: boolean
-	statusFilter?: Object
+	progressFilter?: Object
 }
 
 export const fetchAllQuestions = async ({
@@ -28,7 +28,7 @@ export const fetchAllQuestions = async ({
 			{ $match: filter },
 			{
 				$lookup: {
-					from: 'status',
+					from: 'questionProgress',
 					localField: 'questionId',
 					foreignField: 'questionId',
 					pipeline: [{ $match: { userId } }],
@@ -37,10 +37,10 @@ export const fetchAllQuestions = async ({
 			},
 			{
 				$addFields: {
-					status: {
+					progress: {
 						$ifNull: [
 							{
-								$first: '$result.status',
+								$first: '$result.progress',
 							},
 							'TODO',
 						],
@@ -53,19 +53,19 @@ export const fetchAllQuestions = async ({
 			{
 				$project: {
 					...projection,
-					status: {
+					progress: {
 						$switch: {
 							branches: [
 								{
-									case: { $eq: ['$status', 1] },
+									case: { $eq: ['$progress', 1] },
 									then: 'TODO',
 								},
 								{
-									case: { $eq: ['$status', 2] },
+									case: { $eq: ['$progress', 2] },
 									then: 'ATTEMPTED',
 								},
 								{
-									case: { $eq: ['$status', 3] },
+									case: { $eq: ['$progress', 3] },
 									then: 'SOLVED',
 								},
 							],
@@ -86,13 +86,13 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 	sort = { _id: -1 },
 	onlyBookmarked,
 	userId,
-	statusFilter = {},
+	progressFilter = {},
 }: getAllQuestionsParams) => {
 	const pipeline = [
 		{ $match: filter },
 		{
 			$lookup: {
-				from: 'status',
+				from: 'questionProgress',
 				localField: 'questionId',
 				foreignField: 'questionId',
 				pipeline: [{ $match: { userId } }],
@@ -101,20 +101,20 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 		},
 		{
 			$addFields: {
-				status: {
+				progress: {
 					$ifNull: [
 						{
-							$first: '$result.status',
+							$first: '$result.progress',
 						},
 						'TODO',
 					],
 				},
 			},
 		},
-		...(statusFilter && Object.keys(statusFilter).length > 0
+		...(progressFilter && Object.keys(progressFilter).length > 0
 			? [
 					{
-						$match: statusFilter,
+						$match: progressFilter,
 					},
 				]
 			: []),
@@ -163,57 +163,54 @@ export const fetchQuestionsCount = async (filter = {}) =>
 export const fetchOneQuestion = async (filter = {}, projection = {}) =>
 	await mongoDB.collection(collectionName).findOne(filter, { projection })
 
-export const fetchQuestionWithDifficultyLabelAndStatusTextAndBookmark = async (
-	filter = {},
-	userId: number,
-	projection = {}
-) => {
-	const pipeline = [
-		{ $match: filter },
-		{
-			$lookup: {
-				from: 'status',
-				localField: 'questionId',
-				foreignField: 'questionId',
-				pipeline: [{ $match: { userId } }],
-				as: 'result',
-			},
-		},
-		{
-			$addFields: {
-				status: {
-					$ifNull: [
-						{
-							$first: '$result.status',
-						},
-						'TODO',
-					],
+export const fetchQuestionWithDifficultyLabelAndProgressTextAndBookmark =
+	async (filter = {}, userId: number, projection = {}) => {
+		const pipeline = [
+			{ $match: filter },
+			{
+				$lookup: {
+					from: 'questionProgress',
+					localField: 'questionId',
+					foreignField: 'questionId',
+					pipeline: [{ $match: { userId } }],
+					as: 'result',
 				},
 			},
-		},
-		{
-			$lookup: {
-				from: 'bookmark',
-				localField: 'questionId',
-				foreignField: 'questionId',
-				pipeline: [{ $match: { userId } }],
-				as: 'bookmarkResult',
-			},
-		},
-		{
-			$addFields: {
-				isBookmarked: {
-					$gt: [{ $size: '$bookmarkResult' }, 0],
+			{
+				$addFields: {
+					progress: {
+						$ifNull: [
+							{
+								$first: '$result.progress',
+							},
+							'TODO',
+						],
+					},
 				},
 			},
-		},
-		{
-			$project: projection,
-		},
-	]
+			{
+				$lookup: {
+					from: 'bookmark',
+					localField: 'questionId',
+					foreignField: 'questionId',
+					pipeline: [{ $match: { userId } }],
+					as: 'bookmarkResult',
+				},
+			},
+			{
+				$addFields: {
+					isBookmarked: {
+						$gt: [{ $size: '$bookmarkResult' }, 0],
+					},
+				},
+			},
+			{
+				$project: projection,
+			},
+		]
 
-	return await mongoDB
-		.collection(collectionName)
-		.aggregate(pipeline)
-		.toArray()
-}
+		return await mongoDB
+			.collection(collectionName)
+			.aggregate(pipeline)
+			.toArray()
+	}
