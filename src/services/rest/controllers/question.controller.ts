@@ -58,7 +58,6 @@ export const getSolution = async (ctx: Context) => {
 				userId,
 				questionId: +questionId,
 				createdAt: new Date(),
-				updatedAt: new Date(),
 			},
 			$set: {
 				isSolutionSeen: true,
@@ -83,9 +82,24 @@ export interface SingleDataBaseSchema {
 export const viewQuestion = async (ctx: Context) => {
 	const questionData = ctx.state.shared.question
 
-	const { questionId, dataBaseSchema } = questionData as {
+	const {
+		questionId,
+		question,
+		description,
+		difficulty,
+		dataBaseSchema,
+		progress,
+		isSolutionSeen,
+		isBookmarked,
+	} = questionData as {
 		questionId: number
+		question: string
+		description: string
+		difficulty: string
 		dataBaseSchema: SingleDataBaseSchema[]
+		progress: string
+		isSolutionSeen: boolean
+		isBookmarked: boolean
 	}
 
 	const schemaResponses: { title: string; schema: any }[] = []
@@ -122,7 +136,13 @@ export const viewQuestion = async (ctx: Context) => {
 	)
 
 	ctx.body = successObject('Question data displayed successfully.', {
-		...questionData,
+		questionId,
+		question,
+		description,
+		difficulty,
+		progress,
+		isSolutionSeen,
+		isBookmarked,
 		dataBaseSchema: schemaResponses,
 	})
 }

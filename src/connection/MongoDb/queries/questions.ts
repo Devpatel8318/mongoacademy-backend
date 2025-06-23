@@ -186,6 +186,14 @@ export const fetchQuestionWithDifficultyLabelAndProgressTextAndBookmark =
 							'TODO',
 						],
 					},
+					isSolutionSeen: {
+						$ifNull: [
+							{
+								$first: '$result.isSolutionSeen',
+							},
+							false,
+						],
+					},
 				},
 			},
 			{

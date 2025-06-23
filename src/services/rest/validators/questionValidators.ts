@@ -21,7 +21,7 @@ export const doesQuestionExist = async (ctx: ValidatorContext) => {
 
 	const questionData =
 		await questionQueries.fetchQuestionWithDifficultyLabelAndProgressTextAndBookmark(
-			{ questionId: +questionId },
+			{ questionId: +questionId, isDeleted: { $ne: true } },
 			userId,
 			{
 				_id: 0,
@@ -37,6 +37,7 @@ export const doesQuestionExist = async (ctx: ValidatorContext) => {
 				chainedOps: 1,
 				dataBaseSchema: 1,
 				isBookmarked: 1,
+				isSolutionSeen: 1,
 			}
 		)
 
@@ -75,7 +76,7 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 		onlyBookmarked = 'false',
 	}: GetAllQuestionsQueryParams = ctx.query
 
-	const filters: Record<string, any> = {}
+	const filters: Record<string, any> = { isDeleted: { $ne: true } }
 
 	const limitNum = parseInt(limit, 10)
 	if (isNaN(limitNum) || limitNum < 1 || limitNum > 500) {

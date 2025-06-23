@@ -2,11 +2,22 @@ import { Context, isEqual } from 'deps'
 import config from 'config'
 import { successObject } from 'utils/responseObject'
 import getMd5Hash from 'utils/getMd5Hash'
-import { getDataFromRedis } from 'redisQueries'
+import { CACHE_NULL_MARKER, getDataFromRedis } from 'redisQueries'
 import pushMessageInSqs from 'utils/aws/SQS/pushMessageInSqs'
 import * as questionQueries from 'queries/questionProgress'
 import * as submissionQueries from 'queries/submission'
 import { QuestionProgressEnum, SubmissionStatusEnum } from 'Types/enums'
+
+const getCachedValue = async (hash: string) => {
+	let value = await getDataFromRedis(hash)
+	const isCached = value !== null
+
+	if (value === CACHE_NULL_MARKER) {
+		value = null
+	}
+
+	return { value, isCached }
+}
 
 export const submitAnswer = async (ctx: Context) => {
 	const { email, userId } = ctx.state.shared.user
@@ -35,19 +46,43 @@ export const submitAnswer = async (ctx: Context) => {
 		submissionId,
 	} = answer
 
-	console.log('queryFilter', queryFilter)
+	const correctQueryKeyObject = {
+		collection: correctCollection,
+		queryType: correctQueryType,
+		queryFilter: correctQueryFilter,
+		chainedOps: correctChainedOps,
+		queryUpdate: correctQueryUpdate,
+		queryOptions: correctQueryOptions,
+	}
+	const correctQueryKeyString = JSON.stringify(correctQueryKeyObject)
 
-	const Q_HASH = getMd5Hash(correctQuery)
-	const A_HASH = getMd5Hash(answerQuery)
+	const answerQueryKeyObject = {
+		collection,
+		queryType,
+		queryFilter,
+		chainedOps,
+		queryUpdate,
+		queryOptions,
+	}
+	const answerQueryKeyString = JSON.stringify(answerQueryKeyObject)
 
+	const Q_HASH = getMd5Hash(correctQueryKeyString)
+	const A_HASH = getMd5Hash(answerQueryKeyString)
+
+	// TODO: complete this optimization
 	// small optimization if hash are equal means both will give same result
 	// if (Q_HASH === A_HASH) {
 	// 	ctx.body = 'Correct Answer'
 	// 	return
 	// }
 
-	const cachedQuestionResponse = Q_HASH && (await getDataFromRedis(Q_HASH))
-	const cachedAnswerResponse = A_HASH && (await getDataFromRedis(A_HASH))
+	const {
+		value: cachedQuestionResponse,
+		isCached: isQuestionResponseCached,
+	} = await getCachedValue(Q_HASH)
+
+	const { value: cachedAnswerResponse, isCached: isAnswerResponseCached } =
+		await getCachedValue(A_HASH)
 
 	const dbName = 'db'
 	const sqsUrl = config.aws.sqs.restToQueryProcessorQueue
@@ -58,13 +93,11 @@ export const submitAnswer = async (ctx: Context) => {
 		},
 		senderId: { DataType: 'Number', StringValue: `${userId}` },
 	}
-	const sqsMessage = {
-		socketId,
-		submissionId,
-	}
 
-	if (cachedAnswerResponse && cachedQuestionResponse) {
-		if (isEqual(cachedQuestionResponse, cachedAnswerResponse)) {
+	if (isAnswerResponseCached && isQuestionResponseCached) {
+		const correct = isEqual(cachedQuestionResponse, cachedAnswerResponse)
+
+		if (correct) {
 			await questionQueries.updateOneQuestionProgress(
 				{ userId, questionId },
 				{
@@ -74,70 +107,32 @@ export const submitAnswer = async (ctx: Context) => {
 					},
 				}
 			)
-
-			await submissionQueries.updateOneSubmission(
-				{ submissionId },
-				{
-					$set: {
-						submissionStatus: SubmissionStatusEnum.CORRECT,
-						updatedAt: new Date(),
-					},
-				}
-			)
-
-			ctx.body = successObject('Correct Answer', {
-				questionId,
-				correct: true,
-				expected: cachedQuestionResponse,
-				output: cachedAnswerResponse,
-			})
-		} else {
-			await submissionQueries.updateOneSubmission(
-				{ submissionId },
-				{
-					$set: {
-						submissionStatus: SubmissionStatusEnum.INCORRECT,
-						updatedAt: new Date(),
-					},
-				}
-			)
-
-			ctx.body = successObject('Wrong Answer', {
-				questionId,
-				correct: false,
-				expected: cachedQuestionResponse,
-				output: cachedAnswerResponse,
-			})
 		}
+
+		await submissionQueries.updateOneSubmission(
+			{ submissionId: answer.submissionId },
+			{
+				$set: {
+					submissionStatus: correct
+						? SubmissionStatusEnum.CORRECT
+						: SubmissionStatusEnum.INCORRECT,
+					updatedAt: new Date(),
+				},
+			}
+		)
+
+		ctx.body = successObject(correct ? 'Correct Answer' : 'Wrong Answer', {
+			questionId,
+			correct,
+			expected: cachedQuestionResponse,
+			output: cachedAnswerResponse,
+		})
 		return
-	} else if (!cachedAnswerResponse && cachedQuestionResponse) {
-		Object.assign(sqsMessage, {
-			question: {
-				isResponseCached: true,
-				questionId: questionId,
-				redisKey: Q_HASH,
-			},
-			answer: {
-				isResponseCached: false,
-				/***
-				 * * adding RedisKey to make it easier to set data in redis after processing
-				 */
-				redisKey: A_HASH,
-				data: {
-					dbName,
-					collection,
-					queryType,
-					queryFilter,
-					queryUpdate,
-					queryOptions,
-					answerQuery: answerQuery,
-					chainedOps,
-				},
-			},
-		})
-	} else if (cachedAnswerResponse && !cachedQuestionResponse) {
-		Object.assign(sqsMessage, {
-			question: {
+	}
+
+	const questionData = isQuestionResponseCached
+		? { isResponseCached: true, questionId, redisKey: Q_HASH }
+		: {
 				isResponseCached: false,
 				questionId: questionId,
 				redisKey: Q_HASH,
@@ -151,30 +146,11 @@ export const submitAnswer = async (ctx: Context) => {
 					questionQuery: correctQuery,
 					chainedOps: correctChainedOps,
 				},
-			},
-			answer: {
-				isResponseCached: true,
-				redisKey: Q_HASH,
-			},
-		})
-	} else if (!cachedAnswerResponse && !cachedQuestionResponse) {
-		Object.assign(sqsMessage, {
-			question: {
-				isResponseCached: false,
-				questionId: questionId,
-				redisKey: Q_HASH,
-				data: {
-					dbName,
-					collection: correctCollection,
-					queryType: correctQueryType,
-					queryFilter: correctQueryFilter,
-					queryUpdate: correctQueryUpdate,
-					queryOptions: correctQueryOptions,
-					questionQuery: correctQuery,
-					chainedOps: correctChainedOps,
-				},
-			},
-			answer: {
+			}
+
+	const answerData = isAnswerResponseCached
+		? { isResponseCached: true, redisKey: A_HASH }
+		: {
 				isResponseCached: false,
 				redisKey: A_HASH,
 				data: {
@@ -184,11 +160,16 @@ export const submitAnswer = async (ctx: Context) => {
 					queryFilter,
 					queryUpdate,
 					queryOptions,
-					answerQuery: answerQuery,
+					answerQuery,
 					chainedOps,
 				},
-			},
-		})
+			}
+
+	const sqsMessage = {
+		socketId,
+		submissionId,
+		question: questionData,
+		answer: answerData,
 	}
 
 	console.dir({ sqsMessage }, { depth: null })
@@ -219,18 +200,22 @@ export const runAnswer = async (ctx: Context) => {
 		submissionId,
 	} = answer
 
-	console.log({
+	const answerQueryKeyObject = {
+		collection,
 		queryType,
 		queryFilter,
+		chainedOps,
 		queryUpdate,
 		queryOptions,
-	})
+	}
+	const answerQueryKeyString = JSON.stringify(answerQueryKeyObject)
 
-	const A_HASH = getMd5Hash(answerQuery)
+	const A_HASH = getMd5Hash(answerQueryKeyString)
 
-	const cachedAnswerResponse = A_HASH && (await getDataFromRedis(A_HASH))
+	const { value: cachedAnswerResponse, isCached: isAnswerResponseCached } =
+		await getCachedValue(A_HASH)
 
-	if (cachedAnswerResponse) {
+	if (isAnswerResponseCached) {
 		ctx.body = successObject('', {
 			questionId,
 			output: cachedAnswerResponse,
@@ -239,18 +224,10 @@ export const runAnswer = async (ctx: Context) => {
 		return
 	}
 
-	const dbName = 'db'
-	const sqsUrl = config.aws.sqs.restToQueryProcessorQueue
 	const messageAttribute = {
-		senderEmail: {
-			DataType: 'String',
-			StringValue: email,
-		},
+		senderEmail: { DataType: 'String', StringValue: email },
 		senderId: { DataType: 'Number', StringValue: `${userId}` },
-		isRunOnly: {
-			DataType: 'String',
-			StringValue: 'true',
-		},
+		isRunOnly: { DataType: 'String', StringValue: 'true' },
 	}
 	const sqsMessage = {
 		socketId,
@@ -268,20 +245,19 @@ export const runAnswer = async (ctx: Context) => {
 			isResponseCached: false,
 			redisKey: A_HASH,
 			data: {
-				dbName,
+				dbName: 'db',
 				collection,
 				queryType,
 				queryFilter,
 				queryUpdate,
 				queryOptions,
-				answerQuery: answerQuery,
+				answerQuery,
 				chainedOps,
 			},
 		},
 	})
 
-	console.dir({ sqsMessage }, { depth: null })
-
+	const sqsUrl = config.aws.sqs.restToQueryProcessorQueue
 	await pushMessageInSqs(sqsUrl, sqsMessage, messageAttribute)
 
 	ctx.status = 202
@@ -301,34 +277,12 @@ export const evaluateAnswer = async (ctx: Context) => {
 		answer: string
 	}
 
-	const [questionResponse, answerResponse] = await Promise.allSettled([
-		getDataFromRedis(questionRedisKey),
-		getDataFromRedis(answerRedisKey),
-	])
+	const { value: questionResponse } = await getCachedValue(questionRedisKey)
+	const { value: answerResponse } = await getCachedValue(answerRedisKey)
 
-	console.log('answerRedisKey', answerRedisKey)
-	console.log('answerResponse', answerResponse)
+	const correct = isEqual(questionResponse, answerResponse)
 
-	let response: { question?: any; answer?: any } = {}
-
-	if (
-		questionResponse.status === 'fulfilled' &&
-		answerResponse.status === 'fulfilled'
-	) {
-		response = {
-			question: questionResponse.value,
-			answer: answerResponse.value,
-		}
-	} else {
-		ctx.throw('Something went wrong')
-	}
-
-	console.log({
-		a: response.answer,
-		b: response.question,
-	})
-
-	if (isEqual(response.question, response.answer)) {
+	if (correct) {
 		await questionQueries.updateOneQuestionProgress(
 			{ userId, questionId },
 			{
@@ -338,41 +292,26 @@ export const evaluateAnswer = async (ctx: Context) => {
 				},
 			}
 		)
-
-		await submissionQueries.updateOneSubmission(
-			{ submissionId },
-			{
-				$set: {
-					submissionStatus: SubmissionStatusEnum.CORRECT,
-					updatedAt: new Date(),
-				},
-			}
-		)
-
-		ctx.body = successObject('Correct Answer', {
-			questionId,
-			correct: true,
-			expected: response.question,
-			output: response.answer,
-		})
-	} else {
-		await submissionQueries.updateOneSubmission(
-			{ submissionId },
-			{
-				$set: {
-					submissionStatus: SubmissionStatusEnum.INCORRECT,
-					updatedAt: new Date(),
-				},
-			}
-		)
-
-		ctx.body = successObject('Wrong Answer', {
-			questionId,
-			correct: false,
-			expected: response.question,
-			output: response.answer,
-		})
 	}
+
+	await submissionQueries.updateOneSubmission(
+		{ submissionId },
+		{
+			$set: {
+				submissionStatus: correct
+					? SubmissionStatusEnum.CORRECT
+					: SubmissionStatusEnum.INCORRECT,
+				updatedAt: new Date(),
+			},
+		}
+	)
+
+	ctx.body = successObject(correct ? 'Correct Answer' : 'Wrong Answer', {
+		questionId,
+		correct,
+		expected: questionResponse,
+		output: answerResponse,
+	})
 }
 
 export const submissionList = async (ctx: Context) => {
@@ -389,13 +328,6 @@ export const submissionList = async (ctx: Context) => {
 		}
 	)
 
-	// const submissionList = await MongoDB.collection('submission')
-	// 	.find({
-	// 		userId,
-	// 		questionId: +questionId,
-	// 	})
-	// 	.toArray()
-
 	ctx.body = successObject('Submission List', {
 		questionId,
 		list: submissionList,
@@ -406,7 +338,7 @@ export const runOnlyRetrieveData = async (ctx: Context) => {
 	const { questionId } = ctx.state.shared.question
 	const { answer: answerRedisKey } = ctx.request.body as { answer: string }
 
-	const answerResponse = await getDataFromRedis(answerRedisKey)
+	const { value: answerResponse } = await getCachedValue(answerRedisKey)
 
 	if (answerResponse !== undefined) {
 		ctx.body = successObject('', {

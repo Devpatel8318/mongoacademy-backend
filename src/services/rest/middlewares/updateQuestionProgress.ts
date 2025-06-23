@@ -15,7 +15,6 @@ const updateQuestionProgress = async (ctx: Context, next: Next) => {
 				questionId: +questionId,
 				progress: QuestionProgressEnum.ATTEMPTED,
 				createdAt: new Date(),
-				updatedAt: new Date(),
 			},
 		},
 		{ upsert: true }

@@ -57,7 +57,7 @@ export const getAllQuestions = async (ctx: Context) => {
 	const pageNum = Number(page)
 	const sortOrderNum = sortOrder === 'ASC' ? 1 : -1
 
-	const filters: Record<string, any> = {}
+	const filters: Record<string, any> = { isDeleted: { $ne: true } }
 
 	if (status) {
 		filters.status = {

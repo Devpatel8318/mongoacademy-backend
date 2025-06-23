@@ -2,6 +2,8 @@ import config from 'config'
 import { tryCatch } from 'utils/tryCatch'
 import redis from './connection'
 
+export const CACHE_NULL_MARKER = 'CACHE_NULL'
+
 export const setDataInRedis = async (
 	key: string,
 	value: string | object,
@@ -31,6 +33,11 @@ export const setDataInRedis = async (
 export const getDataFromRedis = async (key: string): Promise<any> => {
 	const [data, error] = await tryCatch(async () => {
 		const data = await redis.get(key)
+
+		if (data === CACHE_NULL_MARKER) {
+			return data
+		}
+
 		return data ? JSON.parse(data) : null
 	})
 
