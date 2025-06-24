@@ -1,9 +1,4 @@
-import Koa from 'koa'
-import cors from '@koa/cors'
-import responseTime from 'koa-response-time'
-import logger from 'koa-logger'
-import errorHandler from 'koa-json-error'
-import bodyParser from 'koa-bodyparser'
+import { Koa, cors, responseTime, logger, errorHandler, bodyParser } from 'deps'
 import config from 'config'
 
 import restRoutes from 'services/rest/routers'

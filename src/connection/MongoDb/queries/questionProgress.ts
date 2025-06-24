@@ -1,4 +1,4 @@
-import { Document, Filter, UpdateFilter, UpdateOptions } from 'mongodb'
+import { Document, Filter, UpdateFilter, UpdateOptions } from 'deps'
 import MongoDB from 'src/connection/MongoDb/primaryConnection'
 
 const collectionName = 'questionProgress'

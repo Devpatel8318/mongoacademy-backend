@@ -1,10 +1,7 @@
-import dotenv from 'dotenv'
+import { dotenv } from 'deps'
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
 
-import {
-	SecretsManagerClient,
-	GetSecretValueCommand,
-} from '@aws-sdk/client-secrets-manager'
+import { SecretsManagerClient, GetSecretValueCommand } from 'deps'
 
 const nodeEnv = process.env.NODE_ENV || 'production'
 

@@ -1,4 +1,4 @@
-import { getSignedUrl } from '@aws-sdk/cloudfront-signer'
+import { getSignedUrl } from 'deps'
 import config from 'config'
 
 const getCloudFrontSignedUrl = (s3ObjectKey: string) => {

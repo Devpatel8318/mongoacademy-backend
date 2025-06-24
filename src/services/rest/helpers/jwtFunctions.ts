@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken'
+import { jwt } from 'deps'
 import config from 'config'
 import { tryCatchSync } from 'utils/tryCatch'
 

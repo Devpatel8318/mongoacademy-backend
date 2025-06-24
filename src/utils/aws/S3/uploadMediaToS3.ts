@@ -2,10 +2,10 @@ import {
 	S3Client,
 	PutObjectCommand,
 	PutObjectRequest,
-} from '@aws-sdk/client-s3'
-import axios from 'axios'
+	axios,
+	Readable,
+} from 'deps'
 import config from 'config'
-import { Readable } from 'stream'
 
 const s3 = new S3Client({
 	region: config.aws.s3.region,

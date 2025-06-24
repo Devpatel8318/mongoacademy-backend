@@ -1,4 +1,4 @@
-import bluebird from 'bluebird'
+import { bluebird } from 'deps'
 import config from 'config'
 
 export default (

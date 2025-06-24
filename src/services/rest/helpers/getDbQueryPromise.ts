@@ -1,4 +1,4 @@
-import { Collection, Db } from 'mongodb'
+import { Collection, Db } from 'deps'
 
 export interface DatabaseSchemaQueryType {
 	collection: string
