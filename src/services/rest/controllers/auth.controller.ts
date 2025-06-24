@@ -12,10 +12,10 @@ import { tryCatchSync } from 'utils/tryCatch'
 import { uploadImageFromUrlToS3 } from 'utils/aws/S3/uploadMediaToS3'
 import buckets from 'utils/aws/S3/buckets'
 import sendEmail from 'utils/mail/sendEmail'
-import forgotPasswordTemplate from 'utils/mail/templates/forgotPasswordTemplate'
 import crypto from 'crypto'
 import { setDataInRedis } from 'redisQueries'
 import config from 'config'
+import { EMAIL_TYPES } from 'utils/mail/templates'
 
 export const signup = async (ctx: Context) => {
 	const { email, password } = ctx.request.body as {
@@ -151,9 +151,11 @@ export const forgotPassword = async (ctx: Context) => {
 		config.common.forgotPasswordRequestTimeout
 	)
 
-	const link = `http://localhost:3050/reset-password?token=${token}`
+	const link = `${config.common.userFrontendUrl}/reset-password?token=${token}`
 
-	const response = await sendEmail(email, forgotPasswordTemplate(link))
+	const response = await sendEmail(email, EMAIL_TYPES.FORGOT_PASSWORD, {
+		link,
+	})
 
 	if (!response.success) {
 		console.error('Failed to send forgot password email:', response.error)

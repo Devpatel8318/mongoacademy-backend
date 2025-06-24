@@ -1,4 +1,4 @@
-const forgotPasswordTemplate = (link: string) => {
+const forgotPasswordTemplate = ({ link }: { link: string }) => {
 	return {
 		subject: 'Password Reset Request',
 

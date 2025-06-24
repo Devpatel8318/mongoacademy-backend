@@ -1,18 +1,17 @@
-/* eslint-disable no-unused-vars */
-export enum DifficultyEnum {
-	EASY = 'EASY',
-	MEDIUM = 'MEDIUM',
-	HARD = 'HARD',
-}
+export const DifficultyEnum = {
+	EASY: 'EASY',
+	MEDIUM: 'MEDIUM',
+	HARD: 'HARD',
+} as const
 
-export enum QuestionProgressEnum {
-	TODO = 'TODO',
-	ATTEMPTED = 'ATTEMPTED',
-	SOLVED = 'SOLVED',
-}
+export const QuestionProgressEnum = {
+	TODO: 'TODO',
+	ATTEMPTED: 'ATTEMPTED',
+	SOLVED: 'SOLVED',
+} as const
 
-export enum SubmissionStatusEnum {
-	PENDING = 'PENDING',
-	CORRECT = 'CORRECT',
-	INCORRECT = 'INCORRECT',
-}
+export const SubmissionStatusEnum = {
+	PENDING: 'PENDING',
+	CORRECT: 'CORRECT',
+	INCORRECT: 'INCORRECT',
+} as const

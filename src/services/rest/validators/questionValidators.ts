@@ -122,7 +122,10 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 		const validProgress = Object.values(QuestionProgressEnum)
 
 		const hasInvalidProgress = progressValues.some(
-			(s) => !validProgress.includes(s as QuestionProgressEnum)
+			(s) =>
+				!validProgress.includes(
+					s as (typeof QuestionProgressEnum)[keyof typeof QuestionProgressEnum]
+				)
 		)
 
 		if (hasInvalidProgress) {
@@ -146,7 +149,10 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 		const validDifficulties = Object.values(DifficultyEnum)
 
 		const hasInvalid = difficultyValues.some(
-			(d) => !validDifficulties.includes(d as DifficultyEnum)
+			(d) =>
+				!validDifficulties.includes(
+					d as (typeof DifficultyEnum)[keyof typeof DifficultyEnum]
+				)
 		)
 
 		if (hasInvalid) {

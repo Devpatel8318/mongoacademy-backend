@@ -1,20 +1,18 @@
 import sgMail from '@sendgrid/mail'
 import config from 'config'
+import { templateMapper } from './templates'
 
 sgMail.setApiKey(config.sendGrid.sendGridApiKey)
 
-const sendEmail = async (
+const sendEmail = async <T extends keyof typeof templateMapper>(
 	to: string,
-	data: {
-		subject: string
-		text: string
-		html: string
-	}
+	type: T,
+	data: Parameters<(typeof templateMapper)[T]>[0]
 ) => {
 	const msg = {
 		to,
 		from: config.sendGrid.senderEmail,
-		...data,
+		...templateMapper[type](data),
 	}
 
 	try {
