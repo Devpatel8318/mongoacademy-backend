@@ -7,17 +7,15 @@ import bodyParser from 'koa-bodyparser'
 import config from 'config'
 
 import restRoutes from 'services/rest/routers'
-import adminRoutes from 'services/admin/routers'
 
 const app = new Koa()
 app.proxy = true
 
-const adminFrontUrl = config.common.adminFrontendUrl
 const userFrontUrl = config.common.userFrontendUrl
 
 const corsOptions: cors.Options = {
 	origin: (request) => {
-		const allowedOrigins = [userFrontUrl, adminFrontUrl]
+		const allowedOrigins = [userFrontUrl]
 		return allowedOrigins.includes(request.header.origin || '')
 			? request.header.origin || ''
 			: ''
@@ -71,7 +69,7 @@ app.use(
 	})
 )
 
-const routers = [restRoutes, adminRoutes]
+const routers = [restRoutes]
 
 routers.forEach((setUpRoute) => {
 	setUpRoute(app)
