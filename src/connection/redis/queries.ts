@@ -7,7 +7,7 @@ export const CACHE_NULL_MARKER = 'CACHE_NULL'
 export const setDataInRedis = async (
 	key: string,
 	value: string | object,
-	expireIn?: number
+	expireInSeconds?: number
 ): Promise<string | null> => {
 	if (config.redis.doNotCache === 'true') {
 		return key
@@ -15,15 +15,15 @@ export const setDataInRedis = async (
 
 	const [, error] = await tryCatch(async () => {
 		const data = typeof value === 'object' ? JSON.stringify(value) : value
-		if (expireIn) {
-			await redis.set(key, data, 'EX', expireIn)
+		if (expireInSeconds) {
+			await redis.set(key, data, 'EX', expireInSeconds)
 		} else {
 			await redis.set(key, data)
 		}
 	})
 
 	if (error) {
-		console.log('Set data from redis error:', error)
+		console.error('Set data from redis error:', error)
 		return null
 	}
 
@@ -42,9 +42,17 @@ export const getDataFromRedis = async (key: string): Promise<any> => {
 	})
 
 	if (error) {
-		console.log('Get data from redis error:', error)
+		console.error('Get data from redis error:', error)
 		return null
 	}
 
 	return data
+}
+
+export const deleteDataFromRedis = async (key: string): Promise<void> => {
+	const [, error] = await tryCatch(redis.del(key))
+
+	if (error) {
+		console.error('Delete data from redis error:', error)
+	}
 }

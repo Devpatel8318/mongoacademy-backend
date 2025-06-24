@@ -11,6 +11,11 @@ import { hashData } from 'utils/hash'
 import { tryCatchSync } from 'utils/tryCatch'
 import { uploadImageFromUrlToS3 } from 'utils/aws/S3/uploadMediaToS3'
 import buckets from 'utils/aws/S3/buckets'
+import sendEmail from 'utils/mail/sendEmail'
+import forgotPasswordTemplate from 'utils/mail/templates/forgotPasswordTemplate'
+import crypto from 'crypto'
+import { setDataInRedis } from 'redisQueries'
+import config from 'config'
 
 export const signup = async (ctx: Context) => {
 	const { email, password } = ctx.request.body as {
@@ -131,4 +136,41 @@ export const logoutUser = async (ctx: Context) => {
 	}
 
 	ctx.body = successObject('Logged out successfully.')
+}
+
+export const forgotPassword = async (ctx: Context) => {
+	const { email } = ctx.request.body as { email: string }
+
+	const token = crypto.randomBytes(32).toString('hex')
+
+	const key = `forgot-password-token:${token}`
+
+	setDataInRedis(
+		key,
+		{ token, email },
+		config.common.forgotPasswordRequestTimeout
+	)
+
+	const link = `http://localhost:3050/reset-password?token=${token}`
+
+	const response = await sendEmail(email, forgotPasswordTemplate(link))
+
+	if (!response.success) {
+		console.error('Failed to send forgot password email:', response.error)
+		ctx.throw('Failed to send forgot password email.')
+	}
+
+	ctx.body = successObject('Password reset link sent to your email.')
+}
+
+export const resetPassword = async (ctx: Context) => {
+	const { email } = ctx.state.shared.resetPasswordData
+	const { password } = ctx.request.body as {
+		password: string
+	}
+	const hashedPassword = await hashData(password)
+
+	await authQueries.updateOneUser({ email }, { password: hashedPassword })
+
+	ctx.body = successObject('Password reset successful.')
 }

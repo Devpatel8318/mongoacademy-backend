@@ -1,12 +1,13 @@
-import awsConfig from './aws.config'
-import encryptDecryptConfig from './encryptDecrypt.config'
-import cookieConfig from './cookie.config'
-import jwtConfig from './jwt.config'
-import mongodbConfig from './mongodb.config'
-import googleConfig from './google.config'
-import redisConfig from './redis.config'
-import adminConfig from './admin.config'
+import aws from './aws.config'
+import encryptDecrypt from './encryptDecrypt.config'
+import cookie from './cookie.config'
+import jwt from './jwt.config'
+import mongodb from './mongodb.config'
+import google from './google.config'
+import redis from './redis.config'
+import admin from './admin.config'
 import concurrency from './concurrency'
+import sendGrid from './sendGrid.config'
 
 const data = {
 	common: {
@@ -15,15 +16,18 @@ const data = {
 		userFrontendUrl: process.env.USER_FRONTEND_URL || '',
 		checkExecutionTime: true,
 		NODE_ENV: process.env.NODE_ENV || 'development',
+		forgotPasswordMaxRequests: 3,
+		forgotPasswordRequestTimeout: 1 * 60 * 15, // 15 minutes
 	},
-	admin: adminConfig,
-	mongoDB: mongodbConfig,
-	cookie: cookieConfig,
-	jwt: jwtConfig,
-	aws: awsConfig,
-	encryptDecrypt: encryptDecryptConfig,
-	google: googleConfig,
-	redis: redisConfig,
+	admin: admin,
+	mongoDB: mongodb,
+	cookie: cookie,
+	jwt: jwt,
+	aws: aws,
+	encryptDecrypt: encryptDecrypt,
+	google: google,
+	redis: redis,
 	concurrency: concurrency,
+	sendGrid,
 }
 export default data

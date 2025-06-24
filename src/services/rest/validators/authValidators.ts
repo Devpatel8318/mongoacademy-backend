@@ -7,6 +7,7 @@ import { emailValidator } from 'utils/emailValidator'
 import * as authQueries from 'queries/auth'
 import { verifyHash } from 'utils/hash'
 import { tryCatch } from 'utils/tryCatch'
+import { deleteDataFromRedis, getDataFromRedis } from 'redisQueries'
 
 export const isRefreshTokenValid = async (ctx: Context) => {
 	const refreshToken = ctx.cookies.get(
@@ -259,5 +260,83 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 		}
 	}
 
+	return null
+}
+
+export const isMaximumForgotPasswordRequestsReached = async (ctx: Context) => {
+	const { email } = ctx.request.body as { email: string }
+
+	const key = `forgot-password-requests:${email}`
+
+	const [forgotPasswordRequestsCount, error] = await tryCatch(
+		getDataFromRedis(key)
+	)
+
+	if (error) {
+		console.error(
+			'Error fetching forgot password requests from Redis:',
+			error
+		)
+		return validationError(
+			'Error checking forgot password requests. Please try again later.',
+			'email'
+		)
+	}
+
+	console.log('Forgot Password Requests Count:', forgotPasswordRequestsCount)
+
+	ctx.state.shared.forgotPasswordRequestsData = {
+		key,
+		count: forgotPasswordRequestsCount,
+	}
+
+	if (!forgotPasswordRequestsCount) {
+		return null // No requests made yet
+	}
+
+	if (
+		forgotPasswordRequestsCount >= config.common.forgotPasswordMaxRequests
+	) {
+		return validationError(
+			'Maximum forgot password requests reached. Please try again after 1 day.',
+			'email'
+		)
+	}
+
+	return null
+}
+
+export const isResetPasswordTokenValid = async (ctx: Context) => {
+	const { token } = ctx.request.body as { token: string }
+
+	if (!token || !token.trim()) {
+		return validationError(
+			'Please provide a valid reset password token',
+			'token'
+		)
+	}
+
+	const key = `forgot-password-token:${token}`
+	const [data, error] = await tryCatch(getDataFromRedis(key))
+
+	if (error) {
+		console.error('Error fetching reset password token from Redis:', error)
+		ctx.throw('Something went wrong')
+	}
+
+	if (!data) {
+		return validationError('Invalid reset password token', 'token')
+	}
+
+	const { email } = data as { email: string }
+
+	if (!email || !email.trim()) {
+		return validationError('Invalid reset password token', 'token')
+	}
+
+	await deleteDataFromRedis(key) // Remove token after validation
+	await deleteDataFromRedis(`forgot-password-requests:${email}`)
+
+	ctx.state.shared.resetPasswordData = { email, token }
 	return null
 }

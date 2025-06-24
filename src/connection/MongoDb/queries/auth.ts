@@ -17,3 +17,12 @@ export const fetchOneUserByEmail = async (email: string) => {
 export const insertUser = async (userDoc: User) => {
 	return await mongoDB.collection(collectionName).insertOne(userDoc)
 }
+
+export const updateOneUser = async (
+	filter: Partial<User> = {},
+	updateData: Partial<User>
+) => {
+	return await mongoDB
+		.collection(collectionName)
+		.updateOne(filter, { $set: updateData })
+}

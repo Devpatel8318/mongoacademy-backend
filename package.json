@@ -39,6 +39,7 @@
     "@babel/preset-typescript": "^7.27.0",
     "@koa/cors": "^5.0.0",
     "@koa/router": "^13.1.0",
+    "@sendgrid/mail": "^8.1.5",
     "axios": "^1.8.4",
     "babel-plugin-module-resolver": "^5.0.2",
     "bcryptjs": "^3.0.2",

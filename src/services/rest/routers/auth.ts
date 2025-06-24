@@ -13,14 +13,19 @@ import {
 	isPasswordValid,
 	isRefreshTokenValid,
 	isLoginMethodEmailPassword,
+	isMaximumForgotPasswordRequestsReached,
+	isResetPasswordTokenValid,
 } from 'services/rest/validators/authValidators'
 import {
+	forgotPassword,
 	loginUser,
 	logoutUser,
 	oauthGoogle,
 	provideAccessToken,
+	resetPassword,
 	signup,
 } from 'services/rest/controllers/auth.controller'
+import updateForgotPasswordRequestCount from '../middlewares/updateForgotPasswordRequestCount'
 
 const router = new Router({ prefix: '/auth' })
 
@@ -62,5 +67,22 @@ router.post(
 router.get('/refresh', validator([isRefreshTokenValid]), provideAccessToken)
 
 router.get('/logout', logoutUser)
+
+router.post(
+	'/forgot-password',
+	validator([
+		isEmailProvided,
+		doesUserExist,
+		isMaximumForgotPasswordRequestsReached,
+	]),
+	updateForgotPasswordRequestCount,
+	forgotPassword
+)
+
+router.post(
+	'/reset-password',
+	validator([isResetPasswordTokenValid, isPasswordProvided, isPasswordValid]),
+	resetPassword
+)
 
 export default router
