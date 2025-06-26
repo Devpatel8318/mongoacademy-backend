@@ -1,0 +1,63 @@
+services:
+    backend-dev:
+        container_name: backend-dev
+        build:
+            context: ../backend
+            target: development
+        volumes:
+            - ../backend:/app
+            - /app/node_modules
+        ports:
+            - '9050:9050'
+        environment:
+            - NODE_ENV=development
+            - REDIS_HOST=redis
+        env_file:
+            - path: ../backend/.env.development
+              required: true
+        depends_on:
+            - redis
+
+    socket-server-dev:
+        container_name: socket-server-dev
+        build:
+            context: ../socketServer
+            target: development
+        volumes:
+            - ../socketServer:/app
+            - /app/node_modules
+        ports:
+            - '9060:9060'
+        environment:
+            - NODE_ENV=development
+            - REDIS_HOST=redis
+        env_file:
+            - path: ../socketServer/.env
+              required: true
+        depends_on:
+            - redis
+
+    client-dev:
+        container_name: client-dev
+        build:
+            context: ../client
+            target: development
+        volumes:
+            - ../client:/app
+            - /app/node_modules
+        ports:
+            - '3050:3050'
+        environment:
+            - NODE_ENV=development
+        env_file:
+            - path: ../client/.env
+              required: true
+        depends_on:
+            - backend-dev
+            - socket-server-dev
+
+    redis:
+        image: redis:alpine
+        container_name: redis
+        ports:
+            - '6379:6379'
