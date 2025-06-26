@@ -1,4 +1,4 @@
-import MongoDB from 'src/connection/MongoDb/primaryConnection'
+import MongoDB from 'MongoDbConnection'
 
 const collectionName = 'bookmark'
 

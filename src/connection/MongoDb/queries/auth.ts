@@ -1,4 +1,4 @@
-import mongoDB from 'src/connection/MongoDb/primaryConnection'
+import mongoDB from 'MongoDbConnection'
 const collectionName = 'auth'
 
 export interface User {
