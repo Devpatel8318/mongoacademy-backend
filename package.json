@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/entry.js",
-    "dev": "NODE_ENV=development nodemon",
+    "dev": "NODE_ENV=development nodemon --watch src --ext ts --exec \"clear && tsx src/entry.ts\"",
     "format": "prettier --write 'src/**/*.ts'",
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint 'src/**/*.ts' --fix",

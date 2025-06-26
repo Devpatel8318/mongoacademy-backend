@@ -1,7 +1,0 @@
-{
-    "watch": [
-        "src"
-    ],
-    "ext": "ts",
-    "exec": "clear && tsx src/entry.ts"
-}
