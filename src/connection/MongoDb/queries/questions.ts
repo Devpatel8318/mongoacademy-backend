@@ -83,7 +83,7 @@ export const fetchAllQuestionsAndCountWithDifficultyLabel = async ({
 	projection = {},
 	skip = 0,
 	limit = 20,
-	sort = { _id: -1 },
+	sort = { _id: 1 },
 	onlyBookmarked,
 	userId,
 	progressFilter = {},

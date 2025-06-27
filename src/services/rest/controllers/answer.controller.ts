@@ -172,7 +172,7 @@ export const submitAnswer = async (ctx: Context) => {
 		answer: answerData,
 	}
 
-	console.dir({ sqsMessage }, { depth: null })
+	console.dir({ sqsMessage, messageAttribute }, { depth: null })
 
 	await pushMessageInSqs(sqsUrl, sqsMessage, messageAttribute)
 
