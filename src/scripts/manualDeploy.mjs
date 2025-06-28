@@ -2,7 +2,8 @@
 import axios from 'axios'
 import process from 'process'
 import dotenv from 'dotenv'
-dotenv.config()
+const NODE_ENV = 'development'
+dotenv.config({ path: `.env.${NODE_ENV}` })
 
 const OWNER = 'Devpatel8318'
 const REPO = 'mongoacademy-backend'
