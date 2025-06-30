@@ -16,7 +16,6 @@ import {
 
 const router = new Router({ prefix: '/question' })
 
-// TODO: add validators , (limit must be less than approx 500, and for all other params)
 router.get(
 	'/list',
 	auth,

@@ -71,7 +71,7 @@ export const isQuestionListQueryParamsValid = async (ctx: ValidatorContext) => {
 		progress = '',
 		difficulty = '',
 		sortBy = '_id',
-		sortOrder = 'DESC',
+		sortOrder = 'ASC',
 		search = '',
 		onlyBookmarked = 'false',
 	}: GetAllQuestionsQueryParams = ctx.query

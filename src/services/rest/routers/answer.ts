@@ -28,6 +28,7 @@ import updateQuestionProgress from '../middlewares/updateQuestionProgress'
 import auth from '../middlewares/auth'
 import addSubmission from '../middlewares/addSubmission'
 import extractQueryPartsFromQuestion from '../middlewares/extractQueryPartsFromQuestion'
+import logSubmissionToCloudWatch from '../middlewares/logSubmissionToCloudWatch'
 
 const router = new Router({ prefix: '/answer' })
 
@@ -50,6 +51,7 @@ router.post(
 		isSocketIdValid,
 	]),
 	addSubmission,
+	(ctx, next) => logSubmissionToCloudWatch(ctx, next, 'submit'),
 	submitAnswer
 )
 
@@ -70,6 +72,7 @@ router.post(
 		isChainedOpsValid,
 		isSocketIdValid,
 	]),
+	(ctx, next) => logSubmissionToCloudWatch(ctx, next, 'run'),
 	runAnswer
 )
 

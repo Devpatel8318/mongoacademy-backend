@@ -7,6 +7,7 @@ import pushMessageInSqs from 'utils/aws/SQS/pushMessageInSqs'
 import * as questionQueries from 'queries/questionProgress'
 import * as submissionQueries from 'queries/submission'
 import { QuestionProgressEnum, SubmissionStatusEnum } from 'Types/enums'
+import { logToCloudWatch } from 'utils/aws/cloudWatch/logToCloudWatch'
 
 const getCachedValue = async (hash: string) => {
 	let value = await getDataFromRedis(hash)
@@ -175,6 +176,19 @@ export const submitAnswer = async (ctx: Context) => {
 	console.dir({ sqsMessage, messageAttribute }, { depth: null })
 
 	await pushMessageInSqs(sqsUrl, sqsMessage, messageAttribute)
+	await logToCloudWatch({
+		group: 'BACKEND',
+		stream: 'REST',
+		data: {
+			message: 'pushed message in SQS',
+			sqsMessage,
+			messageAttribute,
+			userId,
+			questionId,
+			submissionId,
+			socketId,
+		},
+	})
 
 	ctx.status = 202
 	ctx.body = successObject('Your Submission is being processed', {
@@ -259,6 +273,19 @@ export const runAnswer = async (ctx: Context) => {
 
 	const sqsUrl = config.aws.sqs.restToQueryProcessorQueue
 	await pushMessageInSqs(sqsUrl, sqsMessage, messageAttribute)
+	await logToCloudWatch({
+		group: 'BACKEND',
+		stream: 'REST',
+		data: {
+			message: 'pushed message in SQS',
+			sqsMessage,
+			messageAttribute,
+			userId,
+			questionId,
+			submissionId,
+			socketId,
+		},
+	})
 
 	ctx.status = 202
 	ctx.body = successObject('Your Submission is being processed', {

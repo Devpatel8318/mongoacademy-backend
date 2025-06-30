@@ -7,13 +7,7 @@ import {
 } from 'deps'
 import config from 'config'
 
-const s3 = new S3Client({
-	region: config.aws.s3.region,
-	credentials: {
-		accessKeyId: config.aws.s3.accessKeyId,
-		secretAccessKey: config.aws.s3.secretAccessKey,
-	},
-})
+const s3 = new S3Client({ region: config.aws.common.region })
 
 export const uploadMediaToS3 = async ({
 	Bucket,
