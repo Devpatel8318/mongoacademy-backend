@@ -180,7 +180,7 @@ export const submitAnswer = async (ctx: Context) => {
 		group: 'BACKEND',
 		stream: 'REST',
 		data: {
-			message: 'pushed message in SQS',
+			message: 'pushed message in SQS to lambda from REST server',
 			sqsMessage,
 			messageAttribute,
 			userId,
@@ -278,7 +278,7 @@ export const runAnswer = async (ctx: Context) => {
 		group: 'BACKEND',
 		stream: 'REST',
 		data: {
-			message: 'pushed message in SQS',
+			message: 'pushed message in SQS to lambda from REST server',
 			sqsMessage,
 			messageAttribute,
 			userId,
