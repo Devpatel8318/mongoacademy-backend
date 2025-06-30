@@ -193,6 +193,7 @@ export const submitAnswer = async (ctx: Context) => {
 	ctx.status = 202
 	ctx.body = successObject('Your Submission is being processed', {
 		questionId,
+		submissionId,
 		pending: true,
 	})
 }
@@ -290,6 +291,7 @@ export const runAnswer = async (ctx: Context) => {
 	ctx.status = 202
 	ctx.body = successObject('Your Submission is being processed', {
 		questionId,
+		submissionId,
 		pending: true,
 	})
 }
