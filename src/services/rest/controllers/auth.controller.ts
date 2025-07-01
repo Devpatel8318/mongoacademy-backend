@@ -16,6 +16,7 @@ import crypto from 'crypto'
 import { setDataInRedis } from 'redisQueries'
 import config from 'config'
 import { EMAIL_TYPES } from 'utils/mail/templates'
+import { logToCloudWatch } from 'utils/aws/cloudWatch/logToCloudWatch'
 
 export const signup = async (ctx: Context) => {
 	const { email, password } = ctx.request.body as {
@@ -33,7 +34,17 @@ export const signup = async (ctx: Context) => {
 
 	if (error) {
 		console.error('SignUp failed error:', error)
-		ctx.throw('Signup Successful, Login Failed.')
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				userId,
+				message: 'SignUp failed error',
+				error,
+			},
+		})
+		ctx.throw()
 	}
 
 	ctx.body = successObject('Signup Successful.')
@@ -48,7 +59,17 @@ export const loginUser = async (ctx: Context) => {
 
 	if (error) {
 		console.error('Login failed error:', error)
-		ctx.throw('Login Failed.')
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				userId,
+				message: 'Login failed error',
+				error,
+			},
+		})
+		ctx.throw()
 	}
 
 	ctx.body = successObject('Login Successful.')
@@ -85,13 +106,39 @@ export const oauthGoogle = async (ctx: Context) => {
 		errorMessage = 'Signup Failed.'
 	}
 
+	if (errorMessage) {
+		console.error('OAuth failed error:', errorMessage)
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				googleId,
+				email,
+				message: 'OAuth failed error',
+				error: errorMessage,
+			},
+		})
+	}
+
 	const [, error] = tryCatchSync(() => {
 		setAuthCookies(ctx, tokenContent)
 	})
 
 	if (error) {
 		console.error('OAuth failed error:', error)
-		ctx.throw(errorMessage)
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				googleId,
+				email,
+				message: 'OAuth failed error',
+				error,
+			},
+		})
+		ctx.throw(400, error)
 	}
 
 	// update profile picture in s3
@@ -113,7 +160,17 @@ export const provideAccessToken = async (ctx: Context) => {
 
 	if (error) {
 		console.error('Refresh Token failed error:', error)
-		ctx.throw('Refresh Token Failed.')
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				userId,
+				message: 'Refresh Token failed error',
+				error,
+			},
+		})
+		ctx.throw()
 	}
 
 	ctx.body = successObject('Access Token Provided')
@@ -132,7 +189,16 @@ export const logoutUser = async (ctx: Context) => {
 
 	if (error) {
 		console.error('Logout failed error:', error)
-		ctx.throw('Logout Failed.')
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				message: 'Logout failed error',
+				error,
+			},
+		})
+		ctx.throw()
 	}
 
 	ctx.body = successObject('Logged out successfully.')
@@ -159,7 +225,17 @@ export const forgotPassword = async (ctx: Context) => {
 
 	if (!response.success) {
 		console.error('Failed to send forgot password email:', response.error)
-		ctx.throw('Failed to send forgot password email.')
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				email,
+				message: 'Failed to send forgot password email',
+				error: response.error,
+			},
+		})
+		ctx.throw()
 	}
 
 	ctx.body = successObject('Password reset link sent to your email.')

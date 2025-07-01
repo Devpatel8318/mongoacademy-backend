@@ -8,6 +8,5 @@ export const userSetting = async (ctx: Context) => {
 	const { email } = user
 
 	const profilePictureUrl = getCloudFrontSignedUrl(email)
-
 	ctx.body = successObject('', { ...user, profilePictureUrl })
 }

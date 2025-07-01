@@ -8,21 +8,21 @@ const auth = async (ctx: Context, next: Next) => {
 	const cookie = ctx.cookies.get(accessTokenName)
 
 	if (!cookie) {
-		ctx.throw(401, 'Invalid User 1')
+		ctx.throw(401, 'Invalid User')
 	}
 
 	const decodedToken = isTokenValid(cookie)
 
 	if (!decodedToken) {
-		ctx.throw(401, 'Invalid User 2')
+		ctx.throw(401, 'Invalid User')
 	}
 
 	if (!decodedToken.email || typeof decodedToken.email !== 'string') {
-		ctx.throw(401, 'Invalid User 4')
+		ctx.throw(401, 'Invalid User')
 	}
 
 	if (!decodedToken.userId || typeof decodedToken.userId !== 'number') {
-		ctx.throw(401, 'Invalid User 5')
+		ctx.throw(401, 'Invalid User')
 	}
 
 	const { email, userId } = decodedToken

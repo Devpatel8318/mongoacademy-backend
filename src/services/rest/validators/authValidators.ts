@@ -321,7 +321,7 @@ export const isResetPasswordTokenValid = async (ctx: Context) => {
 
 	if (error) {
 		console.error('Error fetching reset password token from Redis:', error)
-		ctx.throw('Something went wrong')
+		ctx.throw()
 	}
 
 	if (!data) {

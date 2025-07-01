@@ -24,14 +24,6 @@ app.use(logger())
 // cors
 app.use(cors(corsOptions))
 
-// interface CustomError {
-// 	expose: boolean
-// 	status: number
-// 	message: string
-// 	success?: boolean
-// 	reasons?: FieldError[]
-// }
-
 // Global Error Handler
 export const formatError = (err: any) => {
 	// Check if the error has an expose flag and handle accordingly.
@@ -46,7 +38,7 @@ export const formatError = (err: any) => {
 	// Default error response for unexposed errors.
 	return {
 		status: 500,
-		message: 'Internal Server Error',
+		message: err.message || 'Internal Server Error',
 	}
 }
 app.use(

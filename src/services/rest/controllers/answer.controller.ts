@@ -212,7 +212,6 @@ export const runAnswer = async (ctx: Context) => {
 		queryOptions,
 		chainedOps,
 		socketId,
-		submissionId,
 	} = answer
 
 	const answerQueryKeyObject = {
@@ -246,7 +245,6 @@ export const runAnswer = async (ctx: Context) => {
 	}
 	const sqsMessage = {
 		socketId,
-		submissionId,
 	}
 
 	Object.assign(sqsMessage, {
@@ -283,7 +281,6 @@ export const runAnswer = async (ctx: Context) => {
 			messageAttribute,
 			userId,
 			questionId,
-			submissionId,
 			socketId,
 		},
 	})
@@ -291,7 +288,6 @@ export const runAnswer = async (ctx: Context) => {
 	ctx.status = 202
 	ctx.body = successObject('Your Submission is being processed', {
 		questionId,
-		submissionId,
 		pending: true,
 	})
 }
@@ -365,6 +361,8 @@ export const submissionList = async (ctx: Context) => {
 
 export const runOnlyRetrieveData = async (ctx: Context) => {
 	const { questionId } = ctx.state.shared.question
+	const { userId } = ctx.state.shared.user
+
 	const { answer: answerRedisKey } = ctx.request.body as { answer: string }
 
 	const { value: answerResponse } = await getCachedValue(answerRedisKey)
@@ -377,6 +375,17 @@ export const runOnlyRetrieveData = async (ctx: Context) => {
 		})
 	} else {
 		console.log('answerResponse not found in redis')
-		ctx.throw('something went wrong')
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				userId,
+				message: 'answerResponse not found in redis',
+				questionId,
+				answerRedisKey,
+			},
+		})
+		ctx.throw()
 	}
 }

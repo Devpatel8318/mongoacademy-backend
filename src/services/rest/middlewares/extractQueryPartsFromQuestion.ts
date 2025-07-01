@@ -1,5 +1,6 @@
 import { Context, isFilterValid, Next } from 'deps'
 import extractPartsFromQuery from '../helpers/extractPartsFromQuery'
+import { logToCloudWatch } from 'utils/aws/cloudWatch/logToCloudWatch'
 
 const extractQueryPartsFromQuestion = async (ctx: Context, next: Next) => {
 	const { question } = ctx.state.shared
@@ -21,7 +22,17 @@ const extractQueryPartsFromQuestion = async (ctx: Context, next: Next) => {
 			errorMessage,
 		})
 		ctx.state.continueCheckingOtherValidators = false
-		ctx.throw(500, 'Internal Server Error')
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				message: 'Error extracting query parts',
+				questionId,
+				error: errorMessage,
+			},
+		})
+		ctx.throw()
 	}
 
 	try {
@@ -36,7 +47,17 @@ const extractQueryPartsFromQuestion = async (ctx: Context, next: Next) => {
 			error,
 		})
 		ctx.state.continueCheckingOtherValidators = false
-		ctx.throw(500, 'Internal Server Error')
+		await logToCloudWatch({
+			group: 'BACKEND',
+			stream: 'REST',
+			data: {
+				type: 'error',
+				message: 'Error parsing JSON from query parts',
+				questionId,
+				error: errorMessage,
+			},
+		})
+		ctx.throw()
 	}
 
 	ctx.state.shared.question = {
