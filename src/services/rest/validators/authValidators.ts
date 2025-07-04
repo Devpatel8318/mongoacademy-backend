@@ -216,7 +216,7 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 	// OAuth Google login/signup (Authorization Code)
 	if (code) {
 		const [tokenResponse, tokenError] = await tryCatch<{
-			access_token: string
+			data: { access_token: string }
 		}>(
 			axios.post('https://oauth2.googleapis.com/token', {
 				client_id: config.google.googleClientId,
@@ -239,7 +239,7 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 		}>(
 			axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
 				headers: {
-					Authorization: `Bearer ${tokenResponse.access_token}`,
+					Authorization: `Bearer ${tokenResponse.data.access_token}`,
 				},
 			})
 		)

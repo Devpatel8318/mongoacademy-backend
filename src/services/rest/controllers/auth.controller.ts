@@ -88,7 +88,7 @@ export const oauthGoogle = async (ctx: Context) => {
 	if (user) {
 		if (!user.googleId) {
 			// registered using email and password but logging in with oauth
-			ctx.throw(401, 'Please log in using email and password.')
+			ctx.throw(400, 'Please log in using email and password.')
 		}
 		Object.assign(tokenContent, { userId: user.userId })
 
