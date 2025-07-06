@@ -233,9 +233,7 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 		}
 
 		const [googleUser, userInfoError] = await tryCatch<{
-			id: string
-			email: string
-			picture: string
+			data: { id: string; email: string; picture: string }
 		}>(
 			axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
 				headers: {
@@ -251,7 +249,7 @@ export const isGoogleAuthValid = async (ctx: Context) => {
 			return validationError('Invalid authorization code', 'code')
 		}
 
-		const { id, email, picture } = googleUser
+		const { id, email, picture } = googleUser.data
 
 		ctx.state.shared = {
 			googleId: id,
